@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Research Papers</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        h1, #pagination {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .paper {
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .paper h2 {
+            margin: 0;
+            color: #0077cc;
+        }
+        .paper h2 a {
+            text-decoration: none;
+            color: #0077cc;
+        }
+        .paper h2 a:hover {
+            text-decoration: underline;
+        }
+        .paper p {
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Research Papers</h1>
+        <div id="papersList">
+            {% for paper in papers %}
+                <div class="paper">
+                    <h2><a href="{{ paper.arxiv_url }}" target="_blank">{{ paper.title }}</a></h2>
+                    <p><strong>Authors:</strong> {{ paper.authors }}</p>
+                    <p><strong>Upload Date:</strong> {{ paper.arxiv_upload_date.strftime('%Y-%m-%d') }}</p>
+                    <p><strong>Abstract:</strong> {{ paper.abstract }}</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div id="pagination">
+        <form action="/" method="get">
+            <input type="number" name="page" min="1" max="{{ total_pages }}" value="{{ current_page }}">
+            <button type="submit">Go to Page</button>
+        </form>
+        {% if current_page > 1 %}
+            <a href="/?page={{ current_page - 1 }}">Previous Page</a>
+        {% endif %}
+        {% if current_page < total_pages %}
+            <a href="/?page={{ current_page + 1 }}">Next Page</a>
+        {% endif %}
+    </div>
+</body>
+</html>
