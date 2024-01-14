@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Research Papers</title>
     <style>
-        body {
+body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
@@ -41,11 +41,64 @@
         .paper p {
             line-height: 1.6;
         }
+        .flash-message {
+            padding: 10px;
+            background-color: #ffdddd;
+            border-left: 6px solid #f44336;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .search-form, .pagination-form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .search-form input, .pagination-form input {
+            padding: 10px;
+            margin-right: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .search-form button, .pagination-form button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #0077cc;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .search-form button:hover, .pagination-form button:hover {
+            background-color: #005fa3;
+        }
+        .pagination-button {
+            padding: 10px 15px;
+            background-color: #0077cc;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 5px;
+            display: inline-block;
+        }
+        .pagination-button:hover {
+            background-color: #005fa3;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Display Flash Messages -->
+        {% for message in get_flashed_messages(category_filter=["error"]) %}
+        <div class="flash-message">
+            {{ message }}
+        </div>
+        {% endfor %}
         <h1>Research Papers</h1>
+        <!-- Search Form -->
+        <div class="search-form">
+            <form action="/search" method="post">
+                <input type="text" name="query" placeholder="Enter search terms" value="{{ search_query }}">
+                <button type="submit">Search</button>
+            </form>
+        </div>
         <div id="papersList">
             {% for paper in papers %}
                 <div class="paper">
@@ -57,17 +110,24 @@
             {% endfor %}
         </div>
 
-        <div id="pagination">
-        <form action="/" method="get">
-            <input type="number" name="page" min="1" max="{{ total_pages }}" value="{{ current_page }}">
-            <button type="submit">Go to Page</button>
-        </form>
-        {% if current_page > 1 %}
-            <a href="/?page={{ current_page - 1 }}">Previous Page</a>
-        {% endif %}
-        {% if current_page < total_pages %}
-            <a href="/?page={{ current_page + 1 }}">Next Page</a>
-        {% endif %}
+        <div id="pagination" class="pagination-form">
+            <!-- Pagination Form -->
+            <form action="/" method="get">
+                <input type="number" name="page" min="1" max="{{ total_pages }}" value="{{ current_page }}">
+                <button type="submit">Go to Page</button>
+            </form>
+
+            <!-- Display Total Number of Pages -->
+            <p>Total Pages: {{ total_pages }}</p>
+
+            <!-- Pagination Buttons -->
+            {% if current_page > 1 %}
+                <a href="/?page={{ current_page - 1 }}" class="pagination-button">Previous Page</a>
+            {% endif %}
+            {% if current_page < total_pages %}
+                <a href="/?page={{ current_page + 1 }}" class="pagination-button">Next Page</a>
+            {% endif %}
+        </div>
     </div>
 </body>
 </html>
