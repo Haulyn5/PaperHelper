@@ -18,15 +18,6 @@ def combine_text(paper):
     """ Combine title, authors, and abstract into a single string. """
     return ' '.join([paper.title, paper.authors, paper.abstract])
 
-def print_progress_bar(iteration, total, prefix='', suffix='', length=50, fill='█'):
-    """ Print iterations progress. """
-    percent = ("{0:.1f}").format(100 * (iteration / float(total)))
-    filled_length = int(length * iteration // total)
-    bar = fill * filled_length + '-' * (length - filled_length)
-    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end="\r")
-    if iteration == total: 
-        print()
-
 def compute_tfidf_vectors():
     with app.app_context():
         start_time = time.time()
@@ -43,7 +34,7 @@ def compute_tfidf_vectors():
         # Save the fitted vectorizer
         with open('tfidf_vectorizer.pkl', 'wb') as file:
             pickle.dump(vectorizer, file)
-
+        print(f"TF-IDF vectors computed and stored in {time.time() - start_time} seconds.")
         print(f"Feature vectors stored in 'feature_vectors.npz'. TF-IDF vectorizer stored in 'tfidf_vectorizer.pkl'.")
 
 if __name__ == "__main__":

@@ -84,6 +84,7 @@ def search_papers(query, vectorizer):
     papers = ResearchPaper.query.all()
     feature_matrix = load_feature_vectors()
     query_vector = vectorizer.transform([query])
+    # print(f"Query vector shape: {query_vector.shape}")
 
     if feature_matrix is not None:
         similarities = cosine_similarity(feature_matrix, query_vector).flatten()

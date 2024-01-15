@@ -7,6 +7,7 @@ The project is still under development. The current version is a prototype that 
 
 - [x] Basic search function
 - [x] Improve the search efficiency. The feature vectors may need to be stored out of database
+- [ ] The search result could be improved. Arxiv-sanity-lite shows a better result.
 - [ ] Show similar paper for a given paper
 - [ ] Allow user to add tags to papers
 - [ ] Allow user to receive recommendations based on tagged papers (like [arxiv-sanity-lite](https://github.com/karpathy/arxiv-sanity-lite))
