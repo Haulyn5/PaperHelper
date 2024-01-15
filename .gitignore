@@ -1,3 +1,4 @@
 
 instance/papers.db
 __pycache__/*
+.vscode/spellright.dict

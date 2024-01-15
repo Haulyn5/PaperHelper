@@ -4,18 +4,20 @@ from datetime import datetime
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from serve import ResearchPaper, db  # Adjust the import as necessary
+from urllib.parse import quote  # Import for URL encoding
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///papers.db'  # Make sure this matches your main application's configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///papers.db'  # Ensure this matches your configuration
 db.init_app(app)
 
 ARXIV_API_URL = "http://export.arxiv.org/api/query?search_query="
 
 def fetch_arxiv_papers(query, max_results):
     with app.app_context():
-        url = f"{ARXIV_API_URL}{query}&max_results={max_results}"
+        # URL encode the query
+        encoded_query = quote(query)
+        url = f"{ARXIV_API_URL}{encoded_query}&max_results={max_results}"
         feed = feedparser.parse(url)
-
         total_fetched, new_papers, updated_papers, already_exists = 0, 0, 0, 0
 
         for entry in feed.entries:
@@ -50,11 +52,12 @@ def fetch_arxiv_papers(query, max_results):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Fetch papers from arXiv and store them in the database.')
-    parser.add_argument('max_results', type=int, nargs='?', default=10, help='Number of papers to fetch')
+    parser.add_argument('--num', type=int, default=10, help='Number of papers to fetch', metavar='max_results')
+    parser.add_argument('-q', '--query', type=str, default="cat:cs.CV+OR+cat:cs.LG+OR+cat:cs.CL+OR+cat:cs.AI+OR+cat:cs.CR+OR+cat:eess.AS", help='Query to search for papers')
+
     args = parser.parse_args()
 
-    default_query = "cat:cs.CV+OR+cat:cs.LG+OR+cat:cs.CL+OR+cat:cs.AI+OR+cat:cs.CR+OR+cat:eess.AS"
-    stats = fetch_arxiv_papers(query=default_query, max_results=args.max_results)
+    stats = fetch_arxiv_papers(query=args.query, max_results=args.num)
     
     print(f"Total papers fetched: {stats[0]}")
     print(f"New papers added: {stats[1]}")

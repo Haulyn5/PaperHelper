@@ -122,13 +122,17 @@ def search_papers(query, vectorizer):
 
 @app.route('/search', methods=['POST'])
 def search():
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
     vectorizer = load_vectorizer()
     if vectorizer is None:
         return render_template('index.html', messages=get_flashed_messages(category_filter=["error"]),  total_pages=1, current_page=1)
-    
     query = request.form['query']
-    sorted_papers, _ = search_papers(query, vectorizer)
-    return render_template('index.html', papers=sorted_papers, search_query=query, total_pages=1, current_page=1)
+    sorted_papers, len_papers = search_papers(query, vectorizer)
+    papers_to_show = sorted_papers[(page - 1) * per_page: page * per_page]
+    total_pages = int(np.ceil(len_papers / per_page))
+    return render_template('index.html', papers=sorted_papers, search_query=query, total_pages=total_pages, current_page=1)  # Todo: All the paper will be shown, need fixing, maybe merge search into main page
+    # return render_template('index.html', papers=papers_to_show, search_query=query, total_pages=total_pages, current_page=1)
 
 # @app.route('/get_papers', methods=['GET'])
 # def get_papers():
