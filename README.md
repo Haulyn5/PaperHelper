@@ -44,10 +44,31 @@ For the first time, you may find that no paper was listed in the web page. You n
 
 ### Fetch from Arxiv
 
+You can fetch papers from Arxiv by running the following command. Note that this will fetch 20 papers from Arxiv with default query. You can change the default query in `arxiv_fetcher.py`.
+
 ```bash
-python arxiv_fetcher.py 20 # fetch 20 papers
+python ./arxiv_fetcher.py --num 20 
 ```
 
+You can also specify the query in the command. For example, the following command will fetch 20 papers with the query `cat:cs.CV` (Computer Vision).
+
+```bash
+python ./arxiv_fetcher.py --num 20 --query "cat:cs.CV"
+```
+
+The query can also be the name of a paper, just try it. For more information about constructing a query, check the [Arxiv API document](https://arxiv.org/help/api/user-manual#query_details).
+
+### Compute feature vectors
+
+Don't forget to computer feature vectors after fetching new papers. Without feature vectors, the search function will not work.
+
+```bash
+python ./compute_feature.py
+```
+
+### Search
+
+Searching is implemented with simple but effective TF-IDF algorithm. You can search for papers in the web page. Try it yourself, don't forget to compute feature vectors first.
 
 
 
