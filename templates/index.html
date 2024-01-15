@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Research Papers</title>
+    <title>Paper Helper</title>
     <style>
 body {
             font-family: Arial, sans-serif;
@@ -91,21 +91,24 @@ body {
             {{ message }}
         </div>
         {% endfor %}
-        <h1>Research Papers</h1>
+        <h1><a href="/" style="text-decoration: none; color: inherit;">Paper Helper</a></h1>
         <!-- Search Form -->
         <div class="search-form">
-            <form action="/search" method="post">
-                <input type="text" name="query" placeholder="Enter search terms" value="{{ search_query }}">
+            <form action="/" method="get">
+                <input type="text" name="query" placeholder="Enter search terms" value="{{ query or '' }}">
                 <button type="submit">Search</button>
-            </form>
+            </form>    
         </div>
         <div id="papersList">
-            {% for paper in papers %}
+            {% for paper, score in papers %}
                 <div class="paper">
                     <h2><a href="{{ paper.arxiv_url }}" target="_blank">{{ paper.title }}</a></h2>
                     <p><strong>Authors:</strong> {{ paper.authors }}</p>
                     <p><strong>Upload Date:</strong> {{ paper.arxiv_upload_date.strftime('%Y-%m-%d') }}</p>
                     <p><strong>Abstract:</strong> {{ paper.abstract }}</p>
+                    {% if score %}
+                        <p><strong>Relevance Score:</strong> {{ "%.2f" % score }}</p>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
@@ -114,18 +117,21 @@ body {
             <!-- Pagination Form -->
             <form action="/" method="get">
                 <input type="number" name="page" min="1" max="{{ total_pages }}" value="{{ current_page }}">
+                {% if query %}
+                    <input type="hidden" name="query" value="{{ query }}">
+                {% endif %}
                 <button type="submit">Go to Page</button>
             </form>
-
+        
             <!-- Display Total Number of Pages -->
             <p>Total Pages: {{ total_pages }}</p>
-
+        
             <!-- Pagination Buttons -->
             {% if current_page > 1 %}
-                <a href="/?page={{ current_page - 1 }}" class="pagination-button">Previous Page</a>
+                <a href="/?page={{ current_page - 1 }}{% if query %}&query={{ query }}{% endif %}" class="pagination-button">Previous Page</a>
             {% endif %}
             {% if current_page < total_pages %}
-                <a href="/?page={{ current_page + 1 }}" class="pagination-button">Next Page</a>
+                <a href="/?page={{ current_page + 1 }}{% if query %}&query={{ query }}{% endif %}" class="pagination-button">Next Page</a>
             {% endif %}
         </div>
     </div>

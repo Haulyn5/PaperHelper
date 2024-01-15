@@ -1,16 +1,15 @@
 from flask import Flask, request, jsonify, render_template, flash, get_flashed_messages
 from flask_sqlalchemy import SQLAlchemy
-from flask import render_template
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import pickle
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///papers.db'  # Your database URI
-app.config['SECRET_KEY'] = 'your_secret_key'  # Set a secure and unique secret key
-
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///papers.db'
+app.config['SECRET_KEY'] = 'your_secret_key'
 db = SQLAlchemy(app)
+
 
 class ResearchPaper(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -79,7 +78,6 @@ def compute_tfidf_vectors():
 def compute_tfidf_endpoint():
     compute_tfidf_vectors()
     return jsonify({'message': 'TF-IDF vectors computed and stored.'})
-
 def load_vectorizer():
     try:
         with open('tfidf_vectorizer.pkl', 'rb') as file:
@@ -87,60 +85,40 @@ def load_vectorizer():
     except FileNotFoundError:
         flash("Vectorizer file not found. Please run 'compute_feature.py' to generate search vectors.", "error")
         return None
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    page = request.args.get('page', 1, type=int)
-    per_page = 5
-    if request.method == 'POST':
-        vectorizer = load_vectorizer()
-        if vectorizer is None:
-            papers = []
-            total_pages = 0
-        else:
-            query = request.form['query']
-            papers, total_pages = search_papers(query, vectorizer)
-    else:
-        papers = ResearchPaper.query.order_by(ResearchPaper.arxiv_upload_date.desc()).paginate(page=page, per_page=per_page, error_out=False).items
-        total_pages = ResearchPaper.query.paginate(page=page, per_page=per_page, error_out=False).pages
-
-    return render_template('index.html', papers=papers, total_pages=total_pages, current_page=page, messages=get_flashed_messages(category_filter=["error"]))
 
 def search_papers(query, vectorizer):
     papers = ResearchPaper.query.all()
     query_vector = vectorizer.transform([query]).toarray()[0]
-
     similarities = []
     for paper in papers:
         if paper.feature_vector is not None:
             cos_sim = cosine_similarity([query_vector], [paper.feature_vector])[0][0]
-            similarities.append((paper, cos_sim))
-        else:
-            similarities.append((paper, 0))
+            if cos_sim > 0:  # Filter out non-relevant papers
+                similarities.append((paper, cos_sim))
+    sorted_papers = sorted(similarities, key=lambda x: x[1], reverse=True)
+    return sorted_papers
 
-    sorted_papers = [paper for paper, similarity in sorted(similarities, key=lambda x: x[1], reverse=True)]
-    return sorted_papers, len(sorted_papers)  # Return the sorted papers and their count
-
-@app.route('/search', methods=['POST'])
-def search():
+@app.route('/', methods=['GET', 'POST'])
+def index():
     page = request.args.get('page', 1, type=int)
     per_page = 5
-    vectorizer = load_vectorizer()
-    if vectorizer is None:
-        return render_template('index.html', messages=get_flashed_messages(category_filter=["error"]),  total_pages=1, current_page=1)
-    query = request.form['query']
-    sorted_papers, len_papers = search_papers(query, vectorizer)
-    papers_to_show = sorted_papers[(page - 1) * per_page: page * per_page]
-    total_pages = int(np.ceil(len_papers / per_page))
-    return render_template('index.html', papers=sorted_papers, search_query=query, total_pages=total_pages, current_page=1)  # Todo: All the paper will be shown, need fixing, maybe merge search into main page
-    # return render_template('index.html', papers=papers_to_show, search_query=query, total_pages=total_pages, current_page=1)
+    query = request.args.get('query', None)
+    papers_to_show = []
+    total_pages = 0
+    print(f"query={query}")
 
-# @app.route('/get_papers', methods=['GET'])
-# def get_papers():
-#     page = request.args.get('page', 1, type=int)
-#     per_page = request.args.get('per_page', 10, type=int)
-#     papers = ResearchPaper.query.order_by(ResearchPaper.arxiv_upload_date.desc()).paginate(page, per_page, error_out=False)
-#     papers_json = [paper.to_dict() for paper in papers.items]
-#     return jsonify({'papers': papers_json, 'total': papers.total, 'pages': papers.pages, 'current_page': papers.page})
+    if query:
+        vectorizer = load_vectorizer()
+        if vectorizer:
+            sorted_papers = search_papers(query, vectorizer)
+            papers_to_show = sorted_papers[(page - 1) * per_page: page * per_page]
+            total_pages = int(np.ceil(len(sorted_papers) / per_page))
+    else:
+        papers_query = ResearchPaper.query.order_by(ResearchPaper.arxiv_upload_date.desc())
+        papers_to_show = [(paper, None) for paper in papers_query.paginate(page=page, per_page=per_page, error_out=False).items]
+        total_pages = papers_query.paginate(page=page, per_page=per_page, error_out=False).pages
+
+    return render_template('index.html', papers=papers_to_show, total_pages=total_pages, current_page=page, query=query)
 
 def setup_database(app):
     with app.app_context():

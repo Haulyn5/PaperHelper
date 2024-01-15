@@ -14,9 +14,13 @@ ARXIV_API_URL = "http://export.arxiv.org/api/query?search_query="
 
 def fetch_arxiv_papers(query, max_results):
     with app.app_context():
-        encoded_query = quote(query)
-        url = f"{ARXIV_API_URL}{encoded_query}&max_results={max_results}"
+        if ": " in query:
+            query = quote(query)
+        # print(f"Query before: {query}")
+        # print(f"encoded_query:{encoded_query}")
+        url = f"{ARXIV_API_URL}{query}&max_results={max_results}"
         feed = feedparser.parse(url)
+        # print(feed)
         total_fetched, new_papers, updated_papers, already_exists = 0, 0, 0, 0
 
         for entry in feed.entries:
