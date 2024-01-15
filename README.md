@@ -70,5 +70,18 @@ python ./compute_feature.py
 
 Searching is implemented with simple but effective TF-IDF algorithm. You can search for papers in the web page. Try it yourself, don't forget to compute feature vectors first.
 
+### Other Utilities
+
+If you are a user of `arxiv-sanity-lite`, you can migrate your data to this project. First copy `migration_scripts/extract_asl_data.py` to the root of `arxiv-sanity-lite` and run it. Then copy the generated `data.json` to the root of this project. Finally, run the following command to migrate the data.
+
+```bash
+python ./asl_migration.py
+```
+
+It takes around 12 minutes to migrate 35k papers.
 
 
+
+## Acknowledgement
+
+This project is inspired by [arxiv-sanity-lite](https://github.com/karpathy/arxiv-sanity-lite). Thanks to the author for providing such a great tool.

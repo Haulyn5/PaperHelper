@@ -2,3 +2,4 @@
 instance/papers.db
 __pycache__/*
 .vscode/spellright.dict
+papers_data.json

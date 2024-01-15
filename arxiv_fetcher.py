@@ -14,7 +14,6 @@ ARXIV_API_URL = "http://export.arxiv.org/api/query?search_query="
 
 def fetch_arxiv_papers(query, max_results):
     with app.app_context():
-        # URL encode the query
         encoded_query = quote(query)
         url = f"{ARXIV_API_URL}{encoded_query}&max_results={max_results}"
         feed = feedparser.parse(url)
@@ -25,6 +24,9 @@ def fetch_arxiv_papers(query, max_results):
             existing_paper = ResearchPaper.query.filter_by(arxiv_url=entry.id).first()
             upload_date = datetime.strptime(entry.published, '%Y-%m-%dT%H:%M:%SZ')
 
+            # Extract and concatenate categories
+            categories = ', '.join(tag['term'] for tag in entry.tags) if entry.tags else None
+
             if existing_paper:
                 if existing_paper.arxiv_upload_date < upload_date:
                     # Update all fields if the paper has a newer upload date
@@ -32,6 +34,7 @@ def fetch_arxiv_papers(query, max_results):
                     existing_paper.authors = ', '.join(author.name for author in entry.authors)
                     existing_paper.abstract = entry.summary
                     existing_paper.arxiv_upload_date = upload_date
+                    existing_paper.arxiv_category = categories  # Update categories
                     updated_papers += 1
                 else:
                     already_exists += 1
@@ -41,13 +44,15 @@ def fetch_arxiv_papers(query, max_results):
                     authors=', '.join(author.name for author in entry.authors),
                     abstract=entry.summary,
                     arxiv_upload_date=upload_date,
-                    arxiv_url=entry.id
+                    arxiv_url=entry.id,
+                    arxiv_category=categories  # Add categories
                 )
                 db.session.add(new_paper)
                 new_papers += 1
         
         db.session.commit()
         return total_fetched, new_papers, updated_papers, already_exists
+
 
 
 if __name__ == "__main__":
