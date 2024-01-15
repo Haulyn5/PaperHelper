@@ -2,8 +2,13 @@ import time
 from sklearn.feature_extraction.text import TfidfVectorizer
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from serve import ResearchPaper, db  # Adjust the import as necessary
+from serve import ResearchPaper, db
+import numpy as np
+import tqdm
+from scipy import sparse
 import pickle
+import sys
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///papers.db'  # Update to match your configuration
@@ -27,21 +32,19 @@ def compute_tfidf_vectors():
         start_time = time.time()
         papers = ResearchPaper.query.all()
         texts = [combine_text(paper) for paper in papers]
-
         vectorizer = TfidfVectorizer()
         tfidf_matrix = vectorizer.fit_transform(texts)
+        print(f"TF-IDF vectors computed. The shape of the matrix is {tfidf_matrix.shape}.")
+        print("The size of the tfidf_matrix variable is:",sys.getsizeof(tfidf_matrix), "bytes.")
 
-        for i, paper in enumerate(papers):
-            paper.feature_vector = tfidf_matrix[i].toarray()[0]
-            db.session.add(paper)
-            print_progress_bar(i + 1, len(papers), prefix='Progress:', suffix='Complete', length=50)
+        # Saving the sparse matrix instead of dense arrays
+        sparse.save_npz('feature_vectors.npz', tfidf_matrix)
 
-        db.session.commit()
-        end_time = time.time()
-        print(f"Completed TF-IDF computation in {end_time - start_time:.2f} seconds")
         # Save the fitted vectorizer
         with open('tfidf_vectorizer.pkl', 'wb') as file:
             pickle.dump(vectorizer, file)
+
+        print(f"Feature vectors stored in 'feature_vectors.npz'. TF-IDF vectorizer stored in 'tfidf_vectorizer.pkl'.")
 
 if __name__ == "__main__":
     compute_tfidf_vectors()

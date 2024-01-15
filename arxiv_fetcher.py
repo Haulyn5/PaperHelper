@@ -14,18 +14,24 @@ ARXIV_API_URL = "http://export.arxiv.org/api/query?search_query="
 
 def fetch_arxiv_papers(query, max_results):
     with app.app_context():
-        if ": " in query:
+        if " " in query:
             query = quote(query)
         # print(f"Query before: {query}")
         # print(f"encoded_query:{encoded_query}")
+        print(f"Fetched papers for query: {query}")
         url = f"{ARXIV_API_URL}{query}&max_results={max_results}"
         feed = feedparser.parse(url)
         # print(feed)
         total_fetched, new_papers, updated_papers, already_exists = 0, 0, 0, 0
 
         for entry in feed.entries:
+            # print("-----------------------------------")
+            # print(entry)
+            # print("-----------------------------------")
+
             total_fetched += 1
-            existing_paper = ResearchPaper.query.filter_by(arxiv_url=entry.id).first()
+            entry_id = entry.id.split('/abs/')[-1].split('v')[0]  # entry.id is the URL, not the id
+            existing_paper = ResearchPaper.query.filter_by(arxiv_id=entry_id).first()
             upload_date = datetime.strptime(entry.published, '%Y-%m-%dT%H:%M:%SZ')
 
             # Extract and concatenate categories
@@ -39,6 +45,7 @@ def fetch_arxiv_papers(query, max_results):
                     existing_paper.abstract = entry.summary
                     existing_paper.arxiv_upload_date = upload_date
                     existing_paper.arxiv_category = categories  # Update categories
+                    existing_paper.arxiv_url = entry.id
                     updated_papers += 1
                 else:
                     already_exists += 1
@@ -49,10 +56,12 @@ def fetch_arxiv_papers(query, max_results):
                     abstract=entry.summary,
                     arxiv_upload_date=upload_date,
                     arxiv_url=entry.id,
+                    arxiv_id=entry_id,
                     arxiv_category=categories  # Add categories
                 )
                 db.session.add(new_paper)
                 new_papers += 1
+                # print(entry.id)  # the id looks like "http://arxiv.org/abs/1711.11357v1"
         
         db.session.commit()
         return total_fetched, new_papers, updated_papers, already_exists

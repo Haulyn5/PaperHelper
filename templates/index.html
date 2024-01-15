@@ -103,6 +103,7 @@ body {
             {% for paper, score in papers %}
                 <div class="paper">
                     <h2><a href="{{ paper.arxiv_url }}" target="_blank">{{ paper.title }}</a></h2>
+                    <p><strong>Arxiv id:</strong> {{ paper.arxiv_id }}</p>
                     <p><strong>Authors:</strong> {{ paper.authors }}</p>
                     <p><strong>Upload Date:</strong> {{ paper.arxiv_upload_date.strftime('%Y-%m-%d') }}</p>
                     <p><strong>Abstract:</strong> {{ paper.abstract }}</p>

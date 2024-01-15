@@ -16,12 +16,14 @@ def load_data(filename):
 def insert_papers(papers_data):
     with app.app_context():
         for paper_id, paper_info in tqdm.tqdm(papers_data.items()):
+            # print(f"Processing arxiv-sanity-lite paper with ID {paper_id}")
+            # print(f"Paper info: {paper_info}")
             # Check if paper already exists
-            existing_paper = ResearchPaper.query.filter_by(arxiv_url=paper_id).first()
-            if existing_paper:
+            paper_id = paper_id.split('v')[0]  # paper_id may looks like "2311.12796v1"
+            existing_paper = ResearchPaper.query.filter_by(arxiv_id=paper_id).first()
+            if existing_paper is not None:
                 print(f"Paper with ID {paper_id} already exists.")
                 continue
-
             # Create a new paper instance
             new_paper = ResearchPaper(
                 title=paper_info['title'],
@@ -29,7 +31,8 @@ def insert_papers(papers_data):
                 abstract=paper_info['abstract'],
                 arxiv_upload_date=datetime.strptime(paper_info['arxiv_upload_date'], '%Y-%m-%dT%H:%M:%SZ'),
                 arxiv_category=paper_info['arxiv_categories'],
-                arxiv_url=paper_id
+                arxiv_url=f"https://arxiv.org/abs/{paper_id}",
+                arxiv_id=paper_id
             )
             db.session.add(new_paper)
 
