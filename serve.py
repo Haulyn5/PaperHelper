@@ -80,18 +80,21 @@ def load_feature_vectors():
         return sparse.load_npz('feature_vectors.npz')
     return None
 
-def search_papers(query, vectorizer):
+def search_papers(query, vectorizer, threshold=0.1, debug=False):
     papers = ResearchPaper.query.all()
     feature_matrix = load_feature_vectors()
     query_vector = vectorizer.transform([query])
-    # print(f"Query vector shape: {query_vector.shape}")
 
     if feature_matrix is not None:
         similarities = cosine_similarity(feature_matrix, query_vector).flatten()
-        paper_scores = [(papers[i], similarities[i]) for i in range(len(papers)) if similarities[i] > 0]
+        paper_scores = [(papers[i], similarities[i]) for i in range(len(papers)) if similarities[i] > threshold]
         sorted_papers = sorted(paper_scores, key=lambda x: x[1], reverse=True)
-        return sorted_papers
+        if debug == False:
+            return sorted_papers
+        else:
+            return sorted_papers[-10:]
     return []
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -113,6 +116,23 @@ def index():
         papers_to_show = [(paper, None) for paper in papers_query.paginate(page=page, per_page=per_page, error_out=False).items]
         total_pages = papers_query.paginate(page=page, per_page=per_page, error_out=False).pages
     return render_template('index.html', papers=papers_to_show, total_pages=total_pages, current_page=page, query=query)
+
+# endpoints to get paper list
+# debug: if True, you will only get the least 10 concerned paper
+@app.route('/search', methods=['GET'])
+def search():
+    search_query = request.args.get('search', '')
+    threshold = request.args.get('threshold', 0.1, type=float)
+    debug = request.args.get('debug', 'false').lower() == 'true'
+
+    if search_query:
+        vectorizer = load_vectorizer()
+        if vectorizer:
+            sorted_papers = search_papers(search_query, vectorizer, threshold, debug)
+            papers_to_show = [paper.to_dict() for paper, _ in sorted_papers]
+            return jsonify(papers_to_show)
+    return jsonify({'message': 'No query provided'}), 400
+
 
 def setup_database(app):
     with app.app_context():
