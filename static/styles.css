@@ -99,3 +99,25 @@ h1, #pagination {
 .base-paper h2 {
     color: #28a745; /* Green color for the title */
 }
+
+.paper-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.paper-info p {
+    margin: 0 10px 0px 0; 
+    flex: 0 1 auto;
+}
+
+.paper h2 {
+    margin-bottom: 20px; /* Added margin below the title */
+}
+
+/* Style for authors and abstract to maintain full width */
+.paper-info p.full-width {
+    flex-basis: 100%; /* Forces full width */
+    margin-top: 10px; /* Adds space above authors and abstract */
+}

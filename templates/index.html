@@ -26,17 +26,20 @@
             {% for paper, score in papers %}
                 <div class="paper">
                     <h2><a href="{{ paper.arxiv_url }}" target="_blank">{{ paper.title }}</a></h2>
-                    <p><strong>Arxiv id:</strong> {{ paper.arxiv_id }}</p>
-                    <p><strong>Authors:</strong> {{ paper.authors }}</p>
-                    <p><strong>Upload Date:</strong> {{ paper.arxiv_upload_date.strftime('%Y-%m-%d') }}</p>
-                    <p><strong>Abstract:</strong> {{ paper.abstract }}</p>
-                    {% if score %}
-                        <p><strong>Relevance Score:</strong> {{ "%.2f" % score }}</p>
-                    {% endif %}
+                    <div class="paper-info">
+                        <p><strong>Arxiv id:</strong> {{ paper.arxiv_id }}</p>
+                        <p><strong>Upload Date:</strong> {{ paper.arxiv_upload_date.strftime('%Y-%m-%d') }}</p>
+                        {% if score %}
+                            <p><strong>Relevance Score:</strong> {{ "%.2f" % score }}</p>
+                        {% endif %}
+                        <p class="full-width"><strong>Authors:</strong> {{ paper.authors }}</p>
+                        <p class="full-width"><strong>Abstract:</strong> {{ paper.abstract }}</p>
+                    </div>
                     <a href="{{ url_for('similar_papers', paper_id=paper.id) }}" class="btn btn-primary">Similar</a>
                 </div>
             {% endfor %}
         </div>
+        
 
         <div id="pagination" class="pagination-form">
             <!-- Pagination Form -->
