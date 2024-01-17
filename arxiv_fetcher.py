@@ -79,7 +79,7 @@ def fetch_arxiv_papers(query, max_results):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Fetch papers from arXiv and store them in the database.')
     parser.add_argument('--num', type=int, default=10, help='Number of papers to fetch', metavar='max_results')
-    parser.add_argument('-q', '--query', type=str, default="cat:cs.CV+OR+cat:cs.LG+OR+cat:cs.CL+OR+cat:cs.AI+OR+cat:cs.CR+OR+cat:eess.AS", help='Query to search for papers')
+    parser.add_argument('-q', '--query', type=str, default="cat:cs.CV+OR+cat:cs.LG+OR+cat:cs.CL+OR+cat:cs.AI+OR+cat:cs.CR+OR+cat:eess.AS&sortBy=lastUpdatedDate&sortOrder=descending", help='Query to search for papers')
 
     args = parser.parse_args()
 

@@ -9,11 +9,12 @@ The project is still under development. The current version is a prototype that 
 - [x] Basic search function
 - [x] Improve the search efficiency. Store the feature vectors in a file out of the database.
 - [x] Show similar paper for a given paper (based on the feature vectors)
+- [x] Fetch information from dblp
+- [ ] Implement abstract parser for more conferences
 - [ ] An Edit page for the user to edit the information of a paper.
 - [ ] A setting page for the user to change the default query, the number of similar papers to show, etc.
 - [ ] Allow user to add tags to papers
 - [ ] Allow user to receive recommendations based on tagged papers (like [arxiv-sanity-lite](https://github.com/karpathy/arxiv-sanity-lite))
-- [ ] Fetch information from dblp and other sources like official websites of conferences
 - [ ] Analysis page for a specific conference
 - [ ] The search result could be improved. Arxiv-sanity-lite shows a better result. (Better ranking)
 
