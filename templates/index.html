@@ -25,17 +25,42 @@
         <div id="papersList">
             {% for paper, score in papers %}
                 <div class="paper">
-                    <h2><a href="{{ paper.arxiv_url }}" target="_blank">{{ paper.title }}</a></h2>
+                    <h2>
+                        {% if paper.publication_url %}
+                            <a href="{{ paper.publication_url }}" target="_blank">{{ paper.title }}</a>
+                        {% elif paper.arxiv_url %}
+                            <a href="{{ paper.arxiv_url }}" target="_blank">{{ paper.title }}</a>
+                        {% else %}
+                            {{ paper.title }}
+                        {% endif %}
+                    </h2>
+                    
                     <div class="paper-info">
-                        <p><strong>Arxiv id:</strong> {{ paper.arxiv_id }}</p>
-                        <p><strong>Upload Date:</strong> {{ paper.arxiv_upload_date.strftime('%Y-%m-%d') }}</p>
+                        {% if paper.arxiv_id and paper.arxiv_upload_date and paper.arxiv_category %}
+                            <p><strong>Arxiv id:</strong> {{ paper.arxiv_id }}</p>
+                            <p><strong>Upload Date:</strong> {{ paper.arxiv_upload_date.strftime('%Y-%m-%d') }}</p>
+                            <p><strong>Arxiv Category:</strong>{{ paper.arxiv_category }}</p>
+                        {% endif %}
+                        {% if paper.publication_name and paper.publication_date %}
+                            <p><strong>Published in: {{ paper.publication_name }} {{ paper.publication_date.strftime('%Y') }}</strong></p>
+                        {% endif %}
                         {% if score %}
                             <p><strong>Relevance Score:</strong> {{ "%.2f" % score }}</p>
                         {% endif %}
                         <p class="full-width"><strong>Authors:</strong> {{ paper.authors }}</p>
                         <p class="full-width"><strong>Abstract:</strong> {{ paper.abstract }}</p>
                     </div>
-                    <a href="{{ url_for('similar_papers', paper_id=paper.id) }}" class="btn btn-primary">Similar</a>
+                    <!-- <a href="{{ url_for('similar_papers', paper_id=paper.id) }}" class="btn btn-primary">Similar</a> -->
+                    <div class="paper-actions">
+                        {% if paper.arxiv_url %}
+                            <a href="{{ paper.arxiv_url }}" class="btn btn-primary" target="_blank">Arxiv</a>
+                        {% endif %}
+                        {% if paper.publication_url %}
+                            <a href="{{ paper.publication_url }}" class="btn btn-primary" target="_blank">Publication</a>
+                        {% endif %}
+                        <a href="{{ url_for('similar_papers', paper_id=paper.id) }}" class="btn btn-primary">Similar</a>
+                    </div>
+                    
                 </div>
             {% endfor %}
         </div>

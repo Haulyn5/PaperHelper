@@ -5,3 +5,5 @@ feedparser
 Flask-SQLAlchemy
 SQLAlchemy
 tqdm
+requests
+beautifulsoup4

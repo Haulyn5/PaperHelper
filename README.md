@@ -1,4 +1,5 @@
 # PaperHelper
+
 A versatile tool designed to streamline the process of fetching and managing academic paper information. 
 
 The project is still under development. The current version is a prototype that can fetch papers from Arxiv and display them in a web page.
@@ -8,6 +9,7 @@ The project is still under development. The current version is a prototype that 
 - [x] Basic search function
 - [x] Improve the search efficiency. Store the feature vectors in a file out of the database.
 - [x] Show similar paper for a given paper (based on the feature vectors)
+- [ ] An Edit page for the user to edit the information of a paper.
 - [ ] A setting page for the user to change the default query, the number of similar papers to show, etc.
 - [ ] Allow user to add tags to papers
 - [ ] Allow user to receive recommendations based on tagged papers (like [arxiv-sanity-lite](https://github.com/karpathy/arxiv-sanity-lite))
@@ -61,6 +63,8 @@ python ./arxiv_fetcher.py --num 20 --query "cat:cs.CV"
 
 The query can also be the name of a paper, just try it. For more information about constructing a query, check the [Arxiv API document](https://arxiv.org/help/api/user-manual#query_details).
 
+Maybe you want to fetch papers periodically to keep the database up to date. (We will add helper scripts for this in the future)
+
 ### Compute feature vectors
 
 Don't forget to computer feature vectors after fetching new papers. Without feature vectors, the search function will not work.
@@ -77,6 +81,22 @@ Searching is implemented with simple but effective TF-IDF algorithm. You can sea
 
 You can find similar papers for a given paper in the web page. For how many similar papers to show, you can change the value `top_n` in function `similar_papers` of `serve.py`. (We will add a setting page in the future)
 
+### Fetch from dblp
+
+DBLP does not provide abstract information for the papers. Therefore, this script also obtains the abstract from the official web page of the paper, if possible. However, this requires a separate script for each conference (if they are hosted on different websites) to parse the abstract of the paper.
+
+This script supports the following publications (for now):
+
+- NDSS (2022, 2023 tested)
+
+To fetch papers from DBLP, run the provided command, but ensure you correctly input the conference’s URL, name, and year. The script doesn’t validate inputs, so be careful.
+
+#### Command
+
+```bash 
+python dblp_fetcher.py --url "https://dblp.org/db/conf/ndss/ndss2022.html" --name "NDSS" --year "2022"
+```
+
 ### Other Utilities
 
 If you are a user of `arxiv-sanity-lite`, you can migrate your data to this project. First copy `migration_scripts/extract_asl_data.py` to the root of `arxiv-sanity-lite` and run it. Then copy the generated `data.json` to the root of this project. Finally, run the following command to migrate the data.
@@ -87,7 +107,10 @@ python ./asl_migration.py
 
 It takes around 12 minutes to migrate 35k papers.
 
+## Known issues
 
+- DBLP stored the authors name in English, but Arxiv stored the authors name in their native language. For example, the name of the author "Bădoiu" is stored as "Badoiu" in DBLP. This will cause the same author to be treated as different authors. We now use normalization to solve this problem. 
+- The same paper will be have different title in DBLP and Arxiv. (Though the difference is small) We hope we will add a merge function in the future to solve this problem.
 
 ## Acknowledgement
 

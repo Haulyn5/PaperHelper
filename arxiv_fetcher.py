@@ -5,6 +5,12 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from serve import ResearchPaper, db  # Adjust the import as necessary
 from urllib.parse import quote  # Import for URL encoding
+import unicodedata
+
+
+def normalize_authors(authors_str):
+    normalized_authors = unicodedata.normalize('NFKD', authors_str)
+    return ''.join([c for c in normalized_authors if not unicodedata.combining(c)])
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///papers.db'  # Ensure this matches your configuration
@@ -36,12 +42,14 @@ def fetch_arxiv_papers(query, max_results):
 
             # Extract and concatenate categories
             categories = ', '.join(tag['term'] for tag in entry.tags) if entry.tags else None
-
+            # normalize authors
+            authors = ', '.join(author.name for author in entry.authors)
+            authors = normalize_authors(authors)
             if existing_paper:
                 if existing_paper.arxiv_upload_date < upload_date:
                     # Update all fields if the paper has a newer upload date
                     existing_paper.title = entry.title
-                    existing_paper.authors = ', '.join(author.name for author in entry.authors)
+                    existing_paper.authors = authors
                     existing_paper.abstract = entry.summary
                     existing_paper.arxiv_upload_date = upload_date
                     existing_paper.arxiv_category = categories  # Update categories
@@ -52,7 +60,7 @@ def fetch_arxiv_papers(query, max_results):
             else:
                 new_paper = ResearchPaper(
                     title=entry.title,
-                    authors=', '.join(author.name for author in entry.authors),
+                    authors=authors,
                     abstract=entry.summary,
                     arxiv_upload_date=upload_date,
                     arxiv_url=entry.id,
