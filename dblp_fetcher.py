@@ -8,7 +8,8 @@ import time
 from datetime import datetime
 from bs4.element import NavigableString
 import unicodedata
-
+import random
+import tqdm
 
 def normalize_authors(authors_str):
     normalized_authors = unicodedata.normalize('NFKD', authors_str)
@@ -19,12 +20,14 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///papers.db"
 db.init_app(app)
 
 Implemented_Conferences_Journals = [
-    "NDSS"
+    "NDSS", "USENIX Security"
 ]  # all the implemented conferences and journals are listed here
 
 def get_abstract(publication_name, publication_url):
     if publication_name == "NDSS":
         return get_abstract_ndss(publication_url)
+    elif publication_name == "USENIX Security":
+        return get_abstract_usenix_security(publication_url)
     else:
         print("Publication not implemented yet!")
         return ""  # Not implemented yet
@@ -66,6 +69,39 @@ def get_abstract_ndss(publication_url, debug=False):
         print(f"Error parsing the page: {e}")
         return None
 
+def get_abstract_usenix_security(publication_url, debug=False):
+    try:
+        start_time = time.time()
+        response = requests.get(publication_url)
+        response.raise_for_status()  # Check that the request was successful
+        if debug:
+            print("Time taken for request: {:.2f} seconds".format(time.time() - start_time))
+        start_time = time.time()
+        soup = BeautifulSoup(response.text, "html.parser")
+        main_content = soup.find("div", class_="field field-name-field-paper-description field-type-text-long field-label-above")
+        if debug:
+            print("Time taken for parsing: {:.2f} seconds".format(time.time() - start_time))
+        if not main_content:
+            print(f"Page parsed and abstract is not found for {publication_url}")
+            return "Abstract not found"
+
+        abstract_paragraphs = main_content.find_all("p")
+        abstract_text = []
+
+        for paragraph in abstract_paragraphs:
+            for content in paragraph.contents:
+                if isinstance(content, NavigableString):
+                    abstract_text.append(content.strip())
+                elif content.name == "br":
+                    abstract_text.append(" ")  # Replace <br> with space
+
+        return " ".join(abstract_text).strip()
+    except requests.RequestException as e:
+        print(f"Error fetching the page: {e}")
+        return None
+    except Exception as e:
+        print(f"Error parsing the page: {e}")
+        return None
 
 
 def fetch_dblp_papers(dblp_url, publication_name, publication_year):
@@ -88,7 +124,8 @@ def fetch_dblp_papers(dblp_url, publication_name, publication_year):
         total_paper_counter = 0
         new_paper_counter = 0
         updated_paper_counter = 0
-        for paper_li in soup.find_all("li", class_="entry inproceedings"):
+        # for paper_li in soup.find_all("li", class_="entry inproceedings"):
+        for paper_li in tqdm.tqdm(soup.find_all("li", class_="entry inproceedings")):
             total_paper_counter += 1
             title = paper_li.find("span", class_="title").text.strip()
             # title may ended with a unnecessary dot
@@ -121,6 +158,10 @@ def fetch_dblp_papers(dblp_url, publication_name, publication_year):
                 )
                 updated_paper_counter += 1
             else:
+                if abstract is None or abstract == "Abstract not found":
+                    print(f"Warning: Abstract not found for {title}. Skipping paper.")
+                    continue
+
                 new_paper = ResearchPaper(
                     title=title,
                     authors=authors_str,
@@ -131,6 +172,8 @@ def fetch_dblp_papers(dblp_url, publication_name, publication_year):
                 )
                 new_paper_counter += 1
                 db.session.add(new_paper)
+                # Random delay between requests
+            time.sleep(random.uniform(1.0, 5.0))
         print(
             f"Total papers fetched: {total_paper_counter}\nNew papers added: {new_paper_counter}\nExisting papers updated: {updated_paper_counter}"
         )

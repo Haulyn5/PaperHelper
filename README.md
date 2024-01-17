@@ -89,8 +89,11 @@ DBLP does not provide abstract information for the papers. Therefore, this scrip
 This script supports the following publications (for now):
 
 - NDSS (2022, 2023 tested)
+- Usenix Security (2023 tested)
 
 To fetch papers from DBLP, run the provided command, but ensure you correctly input the conference’s URL, name, and year. The script doesn’t validate inputs, so be careful.
+
+We tested S&P 2023 and found that the page is dynamically generated, and parsing the page is not easy. We leave it to the future.
 
 #### Command
 
