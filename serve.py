@@ -114,6 +114,39 @@ def index():
         total_pages = papers_query.paginate(page=page, per_page=per_page, error_out=False).pages
     return render_template('index.html', papers=papers_to_show, total_pages=total_pages, current_page=page, query=query)
 
+
+def find_similar_papers(paper_id, top_n=100):
+    feature_matrix = load_feature_vectors()
+    papers = ResearchPaper.query.all()
+
+    if feature_matrix is None or len(papers) == 0:
+        return []
+    try:
+        target_index = [p.id for p in papers].index(paper_id)
+        target_vector = feature_matrix[target_index]
+    except ValueError:
+        # paper_id not found in the list of IDs
+        print(f"Paper ID {paper_id} not found in the database.")
+        return []
+
+    similarities = cosine_similarity(feature_matrix, target_vector).flatten()
+
+    # Sort and get top N indices, excluding the target paper itself
+    similar_indices = np.argsort(similarities)[::-1]
+    similar_indices = [idx for idx in similar_indices if papers[idx].id != paper_id][:top_n]
+
+    similar_papers = [(papers[idx], similarities[idx]) for idx in similar_indices]
+    print(similar_indices)
+    return similar_papers
+
+@app.route('/similar/<int:paper_id>', methods=['GET'])
+def similar_papers(paper_id):
+    base_paper = ResearchPaper.query.get_or_404(paper_id)
+    similar = find_similar_papers(paper_id, top_n=20)
+    return render_template('similar_papers.html', base_paper=base_paper, similar_papers=similar)
+
+
+
 def setup_database(app):
     with app.app_context():
         db.create_all()

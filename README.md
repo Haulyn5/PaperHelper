@@ -6,13 +6,14 @@ The project is still under development. The current version is a prototype that 
 ## TODO:
 
 - [x] Basic search function
-- [x] Improve the search efficiency. The feature vectors may need to be stored out of database
-- [ ] The search result could be improved. Arxiv-sanity-lite shows a better result.
-- [ ] Show similar paper for a given paper
+- [x] Improve the search efficiency. Store the feature vectors in a file out of the database.
+- [x] Show similar paper for a given paper (based on the feature vectors)
+- [ ] A setting page for the user to change the default query, the number of similar papers to show, etc.
 - [ ] Allow user to add tags to papers
 - [ ] Allow user to receive recommendations based on tagged papers (like [arxiv-sanity-lite](https://github.com/karpathy/arxiv-sanity-lite))
 - [ ] Fetch information from dblp and other sources like official websites of conferences
 - [ ] Analysis page for a specific conference
+- [ ] The search result could be improved. Arxiv-sanity-lite shows a better result. (Better ranking)
 
 ## Installation
 
@@ -71,6 +72,10 @@ python ./compute_feature.py
 ### Search
 
 Searching is implemented with simple but effective TF-IDF algorithm. You can search for papers in the web page. Try it yourself, don't forget to compute feature vectors first.
+
+### Similar papers
+
+You can find similar papers for a given paper in the web page. For how many similar papers to show, you can change the value `top_n` in function `similar_papers` of `serve.py`. (We will add a setting page in the future)
 
 ### Other Utilities
 

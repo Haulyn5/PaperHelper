@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Similar Papers to "{{ base_paper.title }}"</title>
+    <!-- Add the same style as in index.html -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+</head>
+
+<body>
+    <!-- At the beginning of <body> in similar_papers.html -->
+    <h1>Base paper</h1>
+    <div class="container">
+        <div class="paper base-paper">
+            <h2><a href="{{ base_paper.arxiv_url }}" target="_blank">{{ base_paper.title }}</a></h2>
+            <p><strong>Arxiv id:</strong> {{ base_paper.arxiv_id }}</p>
+            <p><strong>Authors:</strong> {{ base_paper.authors }}</p>
+            <p><strong>Upload Date:</strong> {{ base_paper.arxiv_upload_date.strftime('%Y-%m-%d') }}</p>
+            <p><strong>Abstract:</strong> {{ base_paper.abstract }}</p>
+        </div>
+    </div>
+    <div class="container">
+        <h1><a href="/" style="text-decoration: none; color: inherit;">Simplar Paper List</a></h1>
+        <div id="similarPapersList">
+            {% for paper, similarity in similar_papers %}
+            <div class="paper">
+                <h2><a href="{{ paper.arxiv_url }}" target="_blank">{{ paper.title }}</a></h2>
+                <p><strong>Arxiv id:</strong> {{ paper.arxiv_id }}</p>
+                <p><strong>Authors:</strong> {{ paper.authors }}</p>
+                <p><strong>Upload Date:</strong> {{ paper.arxiv_upload_date.strftime('%Y-%m-%d') }}</p>
+                <p><strong>Abstract:</strong> {{ paper.abstract }}</p>
+                <p><strong>Similarity Score:</strong> {{ "%.2f" % similarity }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        <div id="backLink">
+            <a href="/" class="pagination-button">Back to the main page</a>
+        </div>
+    </div>
+</body>
+
+</html>
