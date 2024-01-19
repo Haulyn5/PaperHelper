@@ -32,7 +32,9 @@ def fetch_arxiv_papers(query, max_results):
 
         for entry in feed.entries:
             # print("-----------------------------------")
-            # print(entry)
+            # print(f"Title: {entry.title}")
+            # print(f"Authors: {entry.authors}")
+            # print(f"Abstract: {entry.summary}")
             # print("-----------------------------------")
 
             total_fetched += 1
@@ -45,6 +47,12 @@ def fetch_arxiv_papers(query, max_results):
             # normalize authors
             authors = ', '.join(author.name for author in entry.authors)
             authors = normalize_authors(authors)
+            # title may contain unwanted spaces and line breaks
+            entry.title = ' '.join(entry.title.split())
+            # And abstract may contain unwanted line breaks
+            cleaned_abstract = entry.summary.replace('\n', ' ').replace('\r', '')
+            cleaned_abstract = ' '.join(cleaned_abstract.split())
+            entry.summary = cleaned_abstract
             if existing_paper:
                 if existing_paper.arxiv_upload_date < upload_date:
                     # Update all fields if the paper has a newer upload date

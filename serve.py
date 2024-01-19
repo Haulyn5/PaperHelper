@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, flash, get_flashed_messages
+from flask import Flask, request, jsonify, render_template, flash, get_flashed_messages, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
@@ -6,6 +6,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import pickle
 import os
 from scipy import sparse
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///papers.db'
@@ -145,6 +146,47 @@ def similar_papers(paper_id):
     similar = find_similar_papers(paper_id, top_n=20)
     return render_template('similar_papers.html', base_paper=base_paper, similar_papers=similar)
 
+@app.route('/edit_paper/<int:paper_id>', methods=['GET'])
+def edit_paper(paper_id):
+    paper = ResearchPaper.query.get_or_404(paper_id)
+    print(f"Debug:\nPaper Title: {paper.title}\nPaper Abstract: {paper.abstract}")
+    return render_template('paper_info_edit.html', paper=paper)
+
+@app.route('/update_paper', methods=['POST'])
+def update_paper():
+    paper_id = request.form['id']
+    paper = ResearchPaper.query.get_or_404(paper_id)
+
+    # Update fields
+    paper.title = request.form['title']
+    paper.authors = request.form['authors']
+    paper.abstract = request.form['abstract']
+    paper.arxiv_id = request.form.get('arxiv_id')
+
+    # Handle dates
+    arxiv_upload_date = request.form.get('arxiv_upload_date')
+    publication_date = request.form.get('publication_date')
+
+    # Convert string dates to datetime objects
+    if arxiv_upload_date and isinstance(arxiv_upload_date, str):
+        paper.arxiv_upload_date = datetime.strptime(arxiv_upload_date, '%Y-%m-%d')
+    else:
+        paper.arxiv_upload_date = None
+
+    if publication_date and isinstance(publication_date, str):
+        paper.publication_date = datetime.strptime(publication_date, '%Y-%m-%d')
+    else:
+        paper.publication_date = None
+
+    paper.arxiv_category = request.form.get('arxiv_category')
+    paper.arxiv_url = request.form.get('arxiv_url')
+    paper.publication_name = request.form.get('publication_name')
+    paper.publication_url = request.form.get('publication_url')
+
+
+    db.session.commit()
+    flash('Paper updated successfully!')
+    return redirect(url_for('similar_papers', paper_id=paper_id))
 
 
 def setup_database(app):

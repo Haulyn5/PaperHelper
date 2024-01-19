@@ -25,13 +25,13 @@
             </h2>
             
             <div class="base_paper-info">
+                {% if base_paper.publication_name and base_paper.publication_date %}
+                <p><strong>Published in: {{ base_paper.publication_name }} {{ base_paper.publication_date.strftime('%Y') }}</strong></p>
+                {% endif %}
                 {% if base_paper.arxiv_id and base_paper.arxiv_upload_date and base_paper.arxiv_category %}
-                    <p><strong>Arxiv id:</strong> {{ base_paper.arxiv_id }}</p>
                     <p><strong>Upload Date:</strong> {{ base_paper.arxiv_upload_date.strftime('%Y-%m-%d') }}</p>
                     <p><strong>Arxiv Category:</strong>{{ base_paper.arxiv_category }}</p>
-                {% endif %}
-                {% if base_paper.publication_name and base_paper.publication_date %}
-                    <p><strong>Published in: {{ base_paper.publication_name }} {{ base_paper.publication_date.strftime('%Y') }}</strong></p>
+                    <p><strong>Arxiv id:</strong> {{ base_paper.arxiv_id }}</p>
                 {% endif %}
                 {% if score %}
                     <p><strong>Relevance Score:</strong> {{ "%.2f" % score }}</p>
@@ -50,7 +50,7 @@
         </div>
     </div>
     <div class="container">
-        <h1><a href="/" style="text-decoration: none; color: inherit;">Simplar Paper List</a></h1>
+        <h1><a href="/" style="text-decoration: none; color: inherit;">Similar Paper List</a></h1>
         <div id="similarPapersList">
             {% for paper, similarity in similar_papers %}
             <div class="paper">
@@ -65,16 +65,16 @@
                 </h2>
                 
                 <div class="paper-info">
+                    {% if paper.publication_name and paper.publication_date %}
+                    <p><strong>Published in: {{ paper.publication_name }} {{ paper.publication_date.strftime('%Y') }}</strong></p>
+                    {% endif %}
                     {% if paper.arxiv_id and paper.arxiv_upload_date and paper.arxiv_category %}
-                        <p><strong>Arxiv id:</strong> {{ paper.arxiv_id }}</p>
                         <p><strong>Upload Date:</strong> {{ paper.arxiv_upload_date.strftime('%Y-%m-%d') }}</p>
                         <p><strong>Arxiv Category:</strong>{{ paper.arxiv_category }}</p>
+                        <p><strong>Arxiv id:</strong> {{ paper.arxiv_id }}</p>
                     {% endif %}
-                    {% if paper.publication_name and paper.publication_date %}
-                        <p><strong>Published in: {{ paper.publication_name }} {{ paper.publication_date.strftime('%Y') }}</strong></p>
-                    {% endif %}
-                    {% if score %}
-                        <p><strong>Relevance Score:</strong> {{ "%.2f" % score }}</p>
+                    {% if similarity %}
+                        <p><strong>Relevance Score:</strong> {{ "%.2f" % similarity }}</p>
                     {% endif %}
                     <p class="full-width"><strong>Authors:</strong> {{ paper.authors }}</p>
                     <p class="full-width"><strong>Abstract:</strong> {{ paper.abstract }}</p>
@@ -87,6 +87,7 @@
                         <a href="{{ paper.publication_url }}" class="btn btn-primary" target="_blank">Publication</a>
                     {% endif %}
                     <a href="{{ url_for('similar_papers', paper_id=paper.id) }}" class="btn btn-primary">Similar</a>
+                    <a href="{{ url_for('edit_paper', paper_id=paper.id) }}" class="btn btn-primary">Edit</a>
                 </div>
             </div>
             {% endfor %}

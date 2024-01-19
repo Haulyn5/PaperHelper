@@ -10,9 +10,10 @@ The project is still under development. The current version is a prototype that 
 - [x] Improve the search efficiency. Store the feature vectors in a file out of the database.
 - [x] Show similar paper for a given paper (based on the feature vectors)
 - [x] Fetch information from dblp
+- [x] An Edit page for the user to edit the information of a paper.
 - [ ] Implement abstract parser for more conferences
-- [ ] An Edit page for the user to edit the information of a paper.
-- [ ] A setting page for the user to change the default query, the number of similar papers to show, etc.
+- [ ] An page to allow user to manually compute feature vectors.
+- [ ] A setting page for the user to change the default query, the number of similar papers to show, ranking parameters, etc.
 - [ ] Allow user to add tags to papers
 - [ ] Allow user to receive recommendations based on tagged papers (like [arxiv-sanity-lite](https://github.com/karpathy/arxiv-sanity-lite))
 - [ ] Analysis page for a specific conference
@@ -89,7 +90,7 @@ DBLP does not provide abstract information for the papers. Therefore, this scrip
 This script supports the following publications (for now):
 
 - NDSS (2022, 2023 tested)
-- Usenix Security (2023 tested)
+- USENIX Security (2023 tested)
 
 To fetch papers from DBLP, run the provided command, but ensure you correctly input the conference’s URL, name, and year. The script doesn’t validate inputs, so be careful.
 

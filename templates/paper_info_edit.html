@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Paper Information</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var formModified = false;
+            var form = document.querySelector('.edit-form');
+
+            // Track any changes in the form
+            form.addEventListener('change', function () {
+                formModified = true;
+            });
+
+            // Disable warning when form is submitted
+            form.addEventListener('submit', function () {
+                window.onbeforeunload = null;
+            });
+
+            // Implement beforeunload event
+            window.onbeforeunload = function (e) {
+                if (formModified) {
+                    var confirmationMessage = 'It looks like you have been editing something. ' +
+                        'If you leave before saving, your changes will be lost.';
+                    e.returnValue = confirmationMessage; // For most browsers
+                    return confirmationMessage; // For Chrome and some others
+                }
+            };
+        });
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Edit Paper Information</h1>
+        <form action="{{ url_for('update_paper') }}" method="post" class="edit-form">
+            <input type="hidden" name="id" value="{{ paper.id }}">
+
+            <div class="form-group">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" value="{{ paper.title }}" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="authors">Authors:</label>
+                <input type="text" id="authors" name="authors" value="{{ paper.authors }}" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="abstract">Abstract:</label>
+                <textarea id="abstract" name="abstract" class="form-textarea">{{ paper.abstract }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="arxiv_id">Arxiv ID:</label>
+                <input type="text" id="arxiv_id" name="arxiv_id" value="{{ paper.arxiv_id or ''  }}"
+                    class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="arxiv_upload_date">Arxiv Upload Date:</label>
+                {% if paper.arxiv_upload_date%}
+                <input type="date" id="arxiv_upload_date" name="arxiv_upload_date"
+                    value="{{ paper.arxiv_upload_date.strftime('%Y-%m-%d') }}" class="form-control">
+                {% else %}
+                <input type="date" id="arxiv_upload_date" name="arxiv_upload_date" value="" class="form-control">
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+
+                <label for="arxiv_category">Arxiv Category:</label>
+                <input type="text" id="arxiv_category" name="arxiv_category" value="{{ paper.arxiv_category or ''  }}"
+                    class="form-control">
+            </div>
+
+            <div class="form-group">
+
+                <label for="arxiv_url">Arxiv URL:</label>
+                <input type="text" id="arxiv_url" name="arxiv_url" value="{{ paper.arxiv_url or '' }}"
+                    class="form-control">
+            </div>
+            <div class="form-group">
+
+                <label for="publication_name">Publication Name:</label>
+                <input type="text" id="publication_name" name="publication_name"
+                    value="{{ paper.publication_name or ''  }}" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="publication_date">Publication Date:</label>
+                {% if paper.publication_date%}
+                <input type="date" id="publication_date" name="publication_date"
+                    value="{{ paper.publication_date.strftime('%Y-%m-%d')}}" class="form-control">
+                {% else %}
+                <input type="date" id="publication_date" name="publication_date" value="" class="form-control">
+                {% endif %}
+            </div>
+            <div class="form-group">
+
+                <label for="publication_url">Publication URL:</label>
+                <input type="text" id="publication_url" name="publication_url"
+                    value="{{ paper.publication_url or ''  }}" class="form-control">
+            </div>
+
+            <button type="submit" class="btn btn-update-primary">Update</button>
+            <a href="/" class="btn btn-update-primary" style="text-decoration: none;">Go Back</a>
+        </form>
+    </div>
+</body>
+
+</html>

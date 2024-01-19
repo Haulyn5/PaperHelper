@@ -75,9 +75,20 @@ def merge_duplicates(duplicates):
             db.session.add(primary_paper)
         db.session.commit()
 
+def clean_abstract_and_title():
+    with app.app_context():
+        papers = ResearchPaper.query.all()
+        for paper in papers:
+            # Cleaning title
+            paper.title = ' '.join(paper.title.split())
+            # Cleaning abstract
+            cleaned_abstract = paper.abstract.replace('\n', ' ').replace('\r', '')
+            cleaned_abstract = ' '.join(cleaned_abstract.split())
+            paper.abstract = cleaned_abstract
+            db.session.add(paper)
+        db.session.commit()
 
 
 if __name__ == "__main__":
-    duplicates = find_duplicates()
-    merge_duplicates(duplicates)
-    print("Duplicate papers merged and removed.")
+    clean_abstract_and_title()
+    print("Database data cleanup complete.")
