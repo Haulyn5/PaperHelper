@@ -12,6 +12,7 @@ The project is still under development. The current version is a prototype that 
 - [x] Fetch information from dblp
 - [x] An Edit page for the user to edit the information of a paper.
 - [ ] Implement abstract parser for more conferences
+- [ ] Add semantic embedding method like [MiniLM](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2) to enhance the performance.
 - [ ] An page to allow user to manually compute feature vectors.
 - [ ] A setting page for the user to change the default query, the number of similar papers to show, ranking parameters, etc.
 - [ ] Allow user to add tags to papers
