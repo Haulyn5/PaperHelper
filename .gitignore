@@ -8,3 +8,5 @@ feature_vectors.pkl
 feature_vectors.npz
 S&P_information.txt
 instance/papers.db-journal
+semantic_vectors.npz
+paper_hashes.json

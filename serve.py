@@ -7,6 +7,8 @@ import pickle
 import os
 from scipy import sparse
 from datetime import datetime
+from sentence_transformers import SentenceTransformer
+import time
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///papers.db'
@@ -68,6 +70,7 @@ def get_paper(paper_id):
     paper = ResearchPaper.query.get_or_404(paper_id)
     return jsonify(paper.to_dict())
 
+# For TF-IDF vectors
 def load_vectorizer():
     try:
         with open('tfidf_vectorizer.pkl', 'rb') as file:
@@ -76,23 +79,61 @@ def load_vectorizer():
         flash("Vectorizer file not found. Please run 'compute_feature.py' to generate search vectors.", "error")
         return None
 
+# load tfidf vectors
 def load_feature_vectors():
     if os.path.exists('feature_vectors.npz'):
         return sparse.load_npz('feature_vectors.npz')
     return None
 
-def search_papers(query, vectorizer):
-    papers = ResearchPaper.query.all()
-    feature_matrix = load_feature_vectors()
-    query_vector = vectorizer.transform([query])
-    # print(f"Query vector shape: {query_vector.shape}")
+def load_semantic_vectors():
+    if os.path.exists('semantic_vectors.npz'):
+        return np.load('semantic_vectors.npz', allow_pickle=True)['vectors'].item()
+    return None
 
-    if feature_matrix is not None:
-        similarities = cosine_similarity(feature_matrix, query_vector).flatten()
-        paper_scores = [(papers[i], similarities[i]) for i in range(len(papers)) if similarities[i] > 0]
-        sorted_papers = sorted(paper_scores, key=lambda x: x[1], reverse=True)
-        return sorted_papers
-    return []
+
+def search_papers(query, vectorizer):
+    # papers = ResearchPaper.query.all()
+    # feature_matrix = load_feature_vectors()
+    # query_vector = vectorizer.transform([query])
+    # # print(f"Query vector shape: {query_vector.shape}")
+
+    # if feature_matrix is not None:
+    #     similarities = cosine_similarity(feature_matrix, query_vector).flatten()
+    #     paper_scores = [(papers[i], similarities[i]) for i in range(len(papers)) if similarities[i] > 0]
+    #     sorted_papers = sorted(paper_scores, key=lambda x: x[1], reverse=True)
+    #     return sorted_papers
+    # return []
+    start_time = time.time()
+    semantic_vectors = load_semantic_vectors()
+    if not semantic_vectors:
+        flash("Semantic vectors not found. Please run 'compute_feature.py' to generate them.", "error")
+        return []
+    print(f"Time for loading semantic vectors: {time.time() - start_time} seconds.")
+    start_time = time.time()
+    model = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2')
+    query_vector = model.encode([query])
+    print(f"Time for encoding query: {time.time() - start_time} seconds.")
+    start_time = time.time()
+    # Convert semantic vectors to a matrix
+    paper_ids = list(semantic_vectors.keys())
+    vectors_matrix = np.array([semantic_vectors[pid] for pid in paper_ids])
+    print(f"Time for converting semantic vectors to a matrix: {time.time() - start_time} seconds.")
+    start_time = time.time()
+    # Compute similarities in bulk
+    similarities = cosine_similarity(query_vector, vectors_matrix)[0]
+    print(f"Time for computing similarities: {time.time() - start_time} seconds.")
+    start_time = time.time()
+    # Filter out papers with zero similarity
+    relevant_papers = [(int(pid), sim) for pid, sim in zip(paper_ids, similarities) if sim > 0]
+    # Fetch all relevant papers in one query
+    relevant_paper_ids = [pid for pid, _ in relevant_papers]
+    papers = ResearchPaper.query.filter(ResearchPaper.id.in_(relevant_paper_ids)).all()
+    papers_dict = {paper.id: paper for paper in papers}
+
+    # Create a sorted list of (paper, similarity) tuples
+    paper_scores = sorted([(papers_dict[pid], sim) for pid, sim in relevant_papers], key=lambda x: x[1], reverse=True)
+    print(f"Time for creating tuples: {time.time() - start_time} seconds.")
+    return paper_scores
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -117,27 +158,55 @@ def index():
 
 
 def find_similar_papers(paper_id, top_n=100):
-    feature_matrix = load_feature_vectors()
-    papers = ResearchPaper.query.all()
+    # feature_matrix = load_feature_vectors()
+    # papers = ResearchPaper.query.all()
 
-    if feature_matrix is None or len(papers) == 0:
+    # if feature_matrix is None or len(papers) == 0:
+    #     return []
+    # try:
+    #     target_index = [p.id for p in papers].index(paper_id)
+    #     target_vector = feature_matrix[target_index]
+    # except ValueError:
+    #     # paper_id not found in the list of IDs
+    #     print(f"Paper ID {paper_id} not found in the database.")
+    #     return []
+
+    # similarities = cosine_similarity(feature_matrix, target_vector).flatten()
+
+    # # Sort and get top N indices, excluding the target paper itself
+    # similar_indices = np.argsort(similarities)[::-1]
+    # similar_indices = [idx for idx in similar_indices if papers[idx].id != paper_id][:top_n]
+
+    # similar_papers = [(papers[idx], similarities[idx]) for idx in similar_indices]
+    # print(similar_indices)
+    # return similar_papers
+    start_time = time.time()
+    semantic_vectors = load_semantic_vectors()
+    if not semantic_vectors or str(paper_id) not in semantic_vectors:
+        flash(f"Semantic vector for paper ID {paper_id} not found.", "error")
         return []
-    try:
-        target_index = [p.id for p in papers].index(paper_id)
-        target_vector = feature_matrix[target_index]
-    except ValueError:
-        # paper_id not found in the list of IDs
-        print(f"Paper ID {paper_id} not found in the database.")
-        return []
 
-    similarities = cosine_similarity(feature_matrix, target_vector).flatten()
+    # Convert semantic vectors to a matrix
+    paper_ids = list(semantic_vectors.keys())
+    vectors_matrix = np.array([semantic_vectors[pid] for pid in paper_ids])
 
-    # Sort and get top N indices, excluding the target paper itself
-    similar_indices = np.argsort(similarities)[::-1]
-    similar_indices = [idx for idx in similar_indices if papers[idx].id != paper_id][:top_n]
+    target_vector = semantic_vectors[str(paper_id)]
+    print(f"Time for loading semantic vectors: {time.time() - start_time} seconds.")
+    start_time = time.time()
+    # Compute similarities in bulk
+    similarities = cosine_similarity([target_vector], vectors_matrix)[0]
+    print(f"Time for computing similarities: {time.time() - start_time} seconds.")
+    start_time = time.time()
 
-    similar_papers = [(papers[idx], similarities[idx]) for idx in similar_indices]
-    print(similar_indices)
+    # Create a list of (paper_id, similarity) tuples, excluding the target paper
+    paper_scores = [(int(pid), sim) for pid, sim in zip(paper_ids, similarities) if pid != str(paper_id)]
+    print(f"Time for creating tuples: {time.time() - start_time} seconds.")
+    start_time = time.time()
+    # Sort by similarity and select top N
+    similar_papers = sorted(paper_scores, key=lambda x: x[1], reverse=True)[:top_n]
+    similar_papers = [(ResearchPaper.query.get(pid), sim) for pid, sim in similar_papers]
+    print(f"Time for sorting and selecting top N: {time.time() - start_time} seconds.")
+
     return similar_papers
 
 @app.route('/similar/<int:paper_id>', methods=['GET'])

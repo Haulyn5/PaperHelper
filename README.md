@@ -103,6 +103,14 @@ We tested S&P 2023 and found that the page is dynamically generated, and parsing
 python dblp_fetcher.py --url "https://dblp.org/db/conf/ndss/ndss2022.html" --name "NDSS" --year "2022"
 ```
 
+### Semantic Search
+
+We implement semantic search with [all-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2). 
+
+We will add options to choose using TF-IDF features or semantic features. 
+
+In our test, it takes around 1 second to process 30 papers with an i7-9700 CPU.
+
 ### Other Utilities
 
 If you are a user of `arxiv-sanity-lite`, you can migrate your data to this project. First copy `migration_scripts/extract_asl_data.py` to the root of `arxiv-sanity-lite` and run it. Then copy the generated `data.json` to the root of this project. Finally, run the following command to migrate the data.

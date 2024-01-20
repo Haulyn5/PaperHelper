@@ -37,6 +37,61 @@ def compute_tfidf_vectors():
         print(f"TF-IDF vectors computed and stored in {time.time() - start_time} seconds.")
         print(f"Feature vectors stored in 'feature_vectors.npz'. TF-IDF vectorizer stored in 'tfidf_vectorizer.pkl'.")
 
+# below is semantic feature part
+import hashlib
+import json
+import os
+from sentence_transformers import SentenceTransformer
+
+def compute_hash(paper):
+    hasher = hashlib.sha256()
+    content = ' '.join([paper.title, paper.authors, paper.abstract]).encode()
+    hasher.update(content)
+    return hasher.hexdigest()
+
+def load_hashes(filename='paper_hashes.json'):
+    if os.path.exists(filename):
+        with open(filename, 'r') as file:
+            return json.load(file)
+    return {}
+
+def save_hashes(hashes, filename='paper_hashes.json'):
+    with open(filename, 'w') as file:
+        json.dump(hashes, file)
+
+
+def load_semantic_vectors(filename='semantic_vectors.npz'):
+    if os.path.exists(filename):
+        return np.load(filename, allow_pickle=True)['vectors'].item()
+    return {}
+
+def load_semantic_vectors(filename='semantic_vectors.npz'):
+    if os.path.exists(filename):
+        return np.load(filename, allow_pickle=True)['vectors'].item()
+    return {}
+
+def compute_semantic_vectors():
+    with app.app_context():
+        model = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2')
+        papers = ResearchPaper.query.all()
+        hashes = load_hashes()
+        semantic_vectors = load_semantic_vectors()
+
+        for paper in tqdm.tqdm(papers):
+            current_hash = compute_hash(paper)
+            # Check if paper is modified or semantic vector doesn't exist
+            if hashes.get(str(paper.id)) != current_hash or str(paper.id) not in semantic_vectors:
+                text = combine_text(paper)
+                semantic_vectors[str(paper.id)] = model.encode([text])[0]
+                hashes[str(paper.id)] = current_hash
+
+        # Save updated hashes and semantic vectors
+        save_hashes(hashes)
+        np.savez_compressed('semantic_vectors.npz', vectors=semantic_vectors)
+
+
 if __name__ == "__main__":
-    compute_tfidf_vectors()
-    print("TF-IDF feature vectors computed and stored.")
+    # compute_tfidf_vectors()
+    # print("TF-IDF feature vectors computed and stored.")
+    compute_semantic_vectors()
+    print("Semantic feature vectors computed and stored.")
