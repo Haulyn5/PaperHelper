@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from serve import ResearchPaper, db  # Adjust the import as necessary
 from urllib.parse import quote  # Import for URL encoding
 import unicodedata
+import tqdm
 
 
 def normalize_authors(authors_str):
@@ -30,7 +31,7 @@ def fetch_arxiv_papers(query, max_results):
         # print(feed)
         total_fetched, new_papers, updated_papers, already_exists = 0, 0, 0, 0
 
-        for entry in feed.entries:
+        for entry in tqdm.tqdm(feed.entries):
             # print("-----------------------------------")
             # print(f"Title: {entry.title}")
             # print(f"Authors: {entry.authors}")

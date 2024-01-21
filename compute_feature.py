@@ -14,15 +14,19 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///papers.db'  # Update to match your configuration
 db.init_app(app)
 
-def combine_text(paper):
+def combine_text_tfidf(paper):
     """ Combine title, authors, and abstract into a single string. """
     return ' '.join([paper.title, paper.authors, paper.abstract])
+
+def conbine_text_semantic(paper):
+    result = "Title: "+paper.title + " Authors: "+paper.authors + " Abstract: "+paper.abstract
+    return result
 
 def compute_tfidf_vectors():
     with app.app_context():
         start_time = time.time()
         papers = ResearchPaper.query.all()
-        texts = [combine_text(paper) for paper in papers]
+        texts = [combine_text_tfidf(paper) for paper in papers]
         vectorizer = TfidfVectorizer()
         tfidf_matrix = vectorizer.fit_transform(texts)
         print(f"TF-IDF vectors computed. The shape of the matrix is {tfidf_matrix.shape}.")
@@ -81,7 +85,7 @@ def compute_semantic_vectors():
             current_hash = compute_hash(paper)
             # Check if paper is modified or semantic vector doesn't exist
             if hashes.get(str(paper.id)) != current_hash or str(paper.id) not in semantic_vectors:
-                text = combine_text(paper)
+                text = conbine_text_semantic(paper)
                 semantic_vectors[str(paper.id)] = model.encode([text])[0]
                 hashes[str(paper.id)] = current_hash
 
