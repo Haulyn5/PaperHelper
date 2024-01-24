@@ -1,9 +1,17 @@
+:root {
+    --primary-color: #222831; /* Define a root variable for primary color */
+    --secondary-color: #393e46; /* Define a root variable for secondary color */
+    --tertiary-color: #00adb5; /* Define a root variable for tertiary color */
+    --tertiary-color-light: #00c4cc; /* Define a root variable for tertiary color */
+    --quaternary-color: #eeeeee; /* Define a root variable for quaternary color */
+  }
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background: #f4f4f4;
-    color: #333;
+    background: var(--primary-color);
+    color: var(--quaternary-color);
 }
 .container {
     width: 80%;
@@ -13,9 +21,10 @@ body {
 h1, #pagination {
     text-align: center;
     padding: 20px 0;
+    color: var(--tertiary-color);
 }
 .paper {
-    background: #fff;
+    background: var(--secondary-color);
     padding: 20px;
     margin-bottom: 20px;
     border-radius: 5px;
@@ -23,11 +32,11 @@ h1, #pagination {
 }
 .paper h2 {
     margin: 0;
-    color: #0077cc;
+    color: var(--tertiary-color);
 }
 .paper h2 a {
     text-decoration: none;
-    color: #0077cc;
+    color: var(--tertiary-color);
 }
 .paper h2 a:hover {
     text-decoration: underline;
@@ -55,18 +64,18 @@ h1, #pagination {
 .search-form button, .pagination-form button {
     padding: 10px 15px;
     border: none;
-    background-color: #0077cc;
-    color: white;
+    background-color: var(--tertiary-color);
+    color: var(--quaternary-color);
     border-radius: 4px;
     cursor: pointer;
 }
 .search-form button:hover, .pagination-form button:hover {
-    background-color: #005fa3;
+    background-color: var(--tertiary-color-light);
 }
 .pagination-button {
     padding: 10px 15px;
-    background-color: #0077cc;
-    color: white;
+    background-color: var(--tertiary-color);
+    color: var(--quaternary-color);
     text-decoration: none;
     border-radius: 4px;
     margin: 5px;
@@ -77,16 +86,17 @@ h1, #pagination {
 }
 .btn-primary {
     padding: 10px 15px;
-    background-color: #28a745; /* Green */
+    background-color: var(--tertiary-color); 
     color: white;
     text-decoration: none;
     border-radius: 4px;
     display: inline-block;
     margin-top: 10px;
+    border-color: transparent;
 }
 
 .btn-primary:hover {
-    background-color: #218838; /* Darker Green */
+    background-color: var(--tertiary-color-light);
 }
 
 .base-paper {
@@ -178,4 +188,22 @@ h1, #pagination {
 
 .btn-update-primary:hover {
     background-color: #005fa3;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--tertiary-color);
+    color: var(--quaternary-color);
+    padding: 10px;
+}
+
+.nav-item .nav-link {
+    color: var(--quaternary-color);
+    text-decoration: none;
+    padding: 5px 10px;
+}
+
+.nav-item .nav-link:hover {
+    background-color: var(--tertiary-color-light);
 }

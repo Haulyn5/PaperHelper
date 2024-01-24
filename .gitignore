@@ -5,7 +5,7 @@ __pycache__/*
 papers_data.json
 tfidf_vectorizer.pkl
 feature_vectors.pkl
-feature_vectors.npz
+tfidf_feature_vectors.npz
 S&P_information.txt
 instance/papers.db-journal
 semantic_vectors.npz

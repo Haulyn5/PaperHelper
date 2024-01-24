@@ -33,13 +33,13 @@ def compute_tfidf_vectors():
         print("The size of the tfidf_matrix variable is:",sys.getsizeof(tfidf_matrix), "bytes.")
 
         # Saving the sparse matrix instead of dense arrays
-        sparse.save_npz('feature_vectors.npz', tfidf_matrix)
+        sparse.save_npz('tfidf_feature_vectors.npz', tfidf_matrix)
 
         # Save the fitted vectorizer
         with open('tfidf_vectorizer.pkl', 'wb') as file:
             pickle.dump(vectorizer, file)
         print(f"TF-IDF vectors computed and stored in {time.time() - start_time} seconds.")
-        print(f"Feature vectors stored in 'feature_vectors.npz'. TF-IDF vectorizer stored in 'tfidf_vectorizer.pkl'.")
+        print(f"Feature vectors stored in 'tfidf_feature_vectors.npz'. TF-IDF vectorizer stored in 'tfidf_vectorizer.pkl'.")
 
 # below is semantic feature part
 import hashlib
@@ -95,7 +95,7 @@ def compute_semantic_vectors():
 
 
 if __name__ == "__main__":
-    # compute_tfidf_vectors()
-    # print("TF-IDF feature vectors computed and stored.")
+    compute_tfidf_vectors()
+    print("TF-IDF feature vectors computed and stored.")
     compute_semantic_vectors()
     print("Semantic feature vectors computed and stored.")

@@ -1,3 +1,4 @@
+import json
 from flask import Flask, request, jsonify, render_template, flash, get_flashed_messages, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -46,29 +47,12 @@ class ResearchPaper(db.Model):
         }
 
 # db.create_all()
+    
+def read_settings():
+    with open('settings.json', 'r') as file:
+        return json.load(file)
 
-@app.route('/add_paper', methods=['POST'])
-def add_paper():
-    data = request.json
-    new_paper = ResearchPaper(
-        title=data['title'],
-        authors=data['authors'],
-        abstract=data['abstract'],
-        arxiv_upload_date=data.get('arxiv_upload_date'),
-        arxiv_category=data.get('arxiv_category'),
-        arxiv_url=data.get('arxiv_url'),
-        publication_name=data.get('publication_name'),
-        publication_date=data.get('publication_date'),
-        publication_url=data.get('publication_url')
-    )
-    db.session.add(new_paper)
-    db.session.commit()
-    return jsonify({'message': 'Paper added successfully', 'paper_id': new_paper.id}), 201
 
-@app.route('/get_paper/<int:paper_id>', methods=['GET'])
-def get_paper(paper_id):
-    paper = ResearchPaper.query.get_or_404(paper_id)
-    return jsonify(paper.to_dict())
 
 # For TF-IDF vectors
 def load_vectorizer():
@@ -80,9 +64,9 @@ def load_vectorizer():
         return None
 
 # load tfidf vectors
-def load_feature_vectors():
-    if os.path.exists('feature_vectors.npz'):
-        return sparse.load_npz('feature_vectors.npz')
+def load_tfidf_feature_vectors():
+    if os.path.exists('tfidf_feature_vectors.npz'):
+        return sparse.load_npz('tfidf_feature_vectors.npz')
     return None
 
 def load_semantic_vectors():
@@ -90,50 +74,84 @@ def load_semantic_vectors():
         return np.load('semantic_vectors.npz', allow_pickle=True)['vectors'].item()
     return None
 
-
 def search_papers(query, vectorizer):
-    # papers = ResearchPaper.query.all()
-    # feature_matrix = load_feature_vectors()
-    # query_vector = vectorizer.transform([query])
-    # # print(f"Query vector shape: {query_vector.shape}")
+    settings = read_settings()
+    search_feature = settings['search_feature']
+    weights = settings.get('feature_weights', {'tfidf': 1, 'semantic': 1, 'match': 1})
 
-    # if feature_matrix is not None:
-    #     similarities = cosine_similarity(feature_matrix, query_vector).flatten()
-    #     paper_scores = [(papers[i], similarities[i]) for i in range(len(papers)) if similarities[i] > 0]
-    #     sorted_papers = sorted(paper_scores, key=lambda x: x[1], reverse=True)
-    #     return sorted_papers
-    # return []
-    start_time = time.time()
-    semantic_vectors = load_semantic_vectors()
-    if not semantic_vectors:
-        flash("Semantic vectors not found. Please run 'compute_feature.py' to generate them.", "error")
-        return []
-    print(f"Time for loading semantic vectors: {time.time() - start_time} seconds.")
-    start_time = time.time()
-    model = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2')
-    query_vector = model.encode([query])
-    print(f"Time for encoding query: {time.time() - start_time} seconds.")
-    start_time = time.time()
-    # Convert semantic vectors to a matrix
-    paper_ids = list(semantic_vectors.keys())
-    vectors_matrix = np.array([semantic_vectors[pid] for pid in paper_ids])
-    print(f"Time for converting semantic vectors to a matrix: {time.time() - start_time} seconds.")
-    start_time = time.time()
-    # Compute similarities in bulk
-    similarities = cosine_similarity(query_vector, vectors_matrix)[0]
-    print(f"Time for computing similarities: {time.time() - start_time} seconds.")
-    start_time = time.time()
-    # Filter out papers with zero similarity
-    relevant_papers = [(int(pid), sim) for pid, sim in zip(paper_ids, similarities) if sim > 0]
-    # Fetch all relevant papers in one query
-    relevant_paper_ids = [pid for pid, _ in relevant_papers]
-    papers = ResearchPaper.query.filter(ResearchPaper.id.in_(relevant_paper_ids)).all()
-    papers_dict = {paper.id: paper for paper in papers}
+    papers = ResearchPaper.query.all()
+    paper_dict = {paper.id: paper for paper in papers}
 
-    # Create a sorted list of (paper, similarity) tuples
-    paper_scores = sorted([(papers_dict[pid], sim) for pid, sim in relevant_papers], key=lambda x: x[1], reverse=True)
-    print(f"Time for creating tuples: {time.time() - start_time} seconds.")
-    return paper_scores
+    # Initialize score dictionaries
+    tfidf_scores, semantic_scores, match_scores = {}, {}, {}
+    combined_scores = {}
+
+    # Load TF-IDF feature vectors
+    if search_feature in ['tf-idf', 'both', 'combination']:
+        tfidf_feature_matrix = load_tfidf_feature_vectors()
+        tfidf_query_vector = vectorizer.transform([query])
+        tfidf_similarities = cosine_similarity(tfidf_feature_matrix, tfidf_query_vector).flatten()
+        for i, score in enumerate(tfidf_similarities):
+            if score > 0:
+                tfidf_scores[papers[i].id] = score
+        # get max score and norm score
+        max_score = max(tfidf_scores.values())
+        for pid in tfidf_scores:
+            tfidf_scores[pid] /= max_score
+            combined_scores[pid] = combined_scores.get(papers[i].id, 0) + tfidf_scores[pid] * weights['tfidf']
+
+    # Load Semantic vectors
+    if search_feature in ['semantic', 'both', 'combination']:
+        semantic_vectors = load_semantic_vectors()
+        model = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2') if semantic_vectors else None
+        query_vector = model.encode([query])
+        paper_ids = list(semantic_vectors.keys())
+        vectors_matrix = np.array([semantic_vectors[pid] for pid in paper_ids])
+        semantic_similarities = cosine_similarity(query_vector, vectors_matrix)[0]
+        for pid, score in zip(paper_ids, semantic_similarities):
+            if score > 0:
+                semantic_scores[int(pid)] = score
+        # get max score and norm score
+        max_score = max(semantic_scores.values())
+        for pid in semantic_scores:
+            semantic_scores[pid] /= max_score
+            combined_scores[pid] = combined_scores.get(pid, 0) + semantic_scores[pid] * weights['semantic']
+
+    # Match Feature Calculation
+    if search_feature in ['match', 'combination']:
+        query_words = query.lower().split()
+        for paper in papers:
+            score = 0
+            title_words = paper.title.lower().split()
+            authors_words = paper.authors.lower().split()
+            abstract_words = paper.abstract.lower().split()
+
+            for word in query_words:
+                score += 20 if word in title_words else 0
+                score += 10 if word in authors_words else 0
+                score += abstract_words.count(word)
+
+            match_scores[paper.id] = score
+        # get max score and avg score to norm score
+        max_score = max(match_scores.values())
+        avg_score = sum(match_scores.values()) / len(match_scores)
+        for pid in match_scores:
+            match_scores[pid] = (match_scores[pid] - avg_score) / max_score
+            combined_scores[pid] = combined_scores.get(pid, 0) + match_scores[pid] * weights['match']
+
+    # Normalize Scores if in 'combination' mode
+    if search_feature == 'combination':
+        max_score = max(combined_scores.values())
+        for pid in combined_scores:
+            combined_scores[pid] /= max_score
+
+    # Choose final scores based on selected feature
+    final_scores = combined_scores if search_feature == 'combination' else match_scores if search_feature == 'match' else semantic_scores if search_feature == 'semantic' else tfidf_scores
+
+    # Sort and return papers based on the final scores
+    sorted_papers = sorted([(paper_dict[pid], score) for pid, score in final_scores.items()], key=lambda x: x[1], reverse=True)
+    return sorted_papers
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -157,8 +175,8 @@ def index():
     return render_template('index.html', papers=papers_to_show, total_pages=total_pages, current_page=page, query=query)
 
 
-def find_similar_papers(paper_id, top_n=100):
-    # feature_matrix = load_feature_vectors()
+def find_similar_papers(paper_id, top_n=25):
+    # feature_matrix = load_tfidf_feature_vectors()
     # papers = ResearchPaper.query.all()
 
     # if feature_matrix is None or len(papers) == 0:
@@ -212,7 +230,9 @@ def find_similar_papers(paper_id, top_n=100):
 @app.route('/similar/<int:paper_id>', methods=['GET'])
 def similar_papers(paper_id):
     base_paper = ResearchPaper.query.get_or_404(paper_id)
-    similar = find_similar_papers(paper_id, top_n=20)
+    settings = read_settings()
+    number_of_similar_papers = settings['number_of_similar_papers']
+    similar = find_similar_papers(paper_id, top_n=number_of_similar_papers)
     return render_template('similar_papers.html', base_paper=base_paper, similar_papers=similar)
 
 @app.route('/edit_paper/<int:paper_id>', methods=['GET'])
@@ -257,11 +277,43 @@ def update_paper():
     flash('Paper updated successfully!')
     return redirect(url_for('similar_papers', paper_id=paper_id))
 
+@app.route('/settings', methods=['GET'])
+def settings():
+    with open('settings.json', 'r') as file:
+        settings = json.load(file)
+    return render_template('settings.html', settings=settings)
+
+@app.route('/update_settings', methods=['POST'])
+def update_settings():
+    settings = {
+        "default_arxiv_query": request.form['default_arxiv_query'],
+        "number_of_similar_papers": int(request.form['number_of_similar_papers']),
+        "search_feature": request.form['search_feature']
+    }
+    with open('settings.json', 'w') as file:
+        json.dump(settings, file)
+    flash('Settings updated successfully!')
+    return redirect(url_for('settings'))
+
+def create_default_settings():
+    default_settings = {
+        "default_arxiv_query": "cat:cs.CV+OR+cat:cs.LG+OR+cat:cs.CL+OR+cat:cs.AI+OR+cat:cs.CR+OR+cat:eess.AS&sortBy=lastUpdatedDate&sortOrder=descending",
+        "number_of_similar_papers": 25,
+        "search_feature": "both"
+    }
+    with open('settings.json', 'w') as file:
+        json.dump(default_settings, file)
+
+def check_settings_file():
+    if not os.path.isfile('settings.json'):
+        create_default_settings()
+
 
 def setup_database(app):
     with app.app_context():
         db.create_all()
 
 if __name__ == '__main__':
+    check_settings_file()
     setup_database(app)
     app.run(debug=True, port=40500)
