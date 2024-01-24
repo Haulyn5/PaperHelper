@@ -11,14 +11,14 @@ The project is still under development. The current version is a prototype that 
 - [x] Show similar paper for a given paper (based on the feature vectors)
 - [x] Fetch information from dblp
 - [x] An Edit page for the user to edit the information of a paper.
+- [x] Add semantic embedding method like [MiniLM](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2) to enhance the performance.
+- [x] A setting page for the user to change the default query, the number of similar papers to show, ranking parameters, etc.
+- [x] The search result could be improved. Arxiv-sanity-lite shows a better result. Now we incorporate the search method of arxiv-sanity-lite as `Match` and you could chose it in the settings page.
 - [ ] Implement abstract parser for more conferences
-- [ ] Add semantic embedding method like [MiniLM](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2) to enhance the performance.
-- [ ] An page to allow user to manually compute feature vectors.
-- [ ] A setting page for the user to change the default query, the number of similar papers to show, ranking parameters, etc.
+- [ ] A page to allow user to manually compute feature vectors.
 - [ ] Allow user to add tags to papers
 - [ ] Allow user to receive recommendations based on tagged papers (like [arxiv-sanity-lite](https://github.com/karpathy/arxiv-sanity-lite))
 - [ ] Analysis page for a specific conference
-- [ ] The search result could be improved. Arxiv-sanity-lite shows a better result. (Better ranking)
 
 ## Installation
 
@@ -78,11 +78,16 @@ python ./compute_feature.py
 
 ### Search
 
-Searching is implemented with simple but effective TF-IDF algorithm. You can search for papers in the web page. Try it yourself, don't forget to compute feature vectors first.
+You can now search for papers with 4 methods/ features: `Match`, `TF-IDF`, `Semantic` and `Combination`. You can change the default search method in the settings page. 
+
+- `Match` is the search method used in [arxiv-sanity-lite](https://github.com/karpathy/arxiv-sanity-lite/blob/master/serve.py#L172C5-L172C16)
+- `TF-IDF` is the search method used in the previous version of this project. Simple but effective. Implemented with [scikit-learn](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html)
+- `Semantic` is the search method based on [MiniLM](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2). It shows better performance than TF-IDF in most cases.
+- `Combination` is the combination of `TF-IDF`, `Semantic` and `Match`. It is the default search method. You can also set the weight of each method in the settings page.
 
 ### Similar papers
 
-You can find similar papers for a given paper in the web page. For how many similar papers to show, you can change the value `top_n` in function `similar_papers` of `serve.py`. (We will add a setting page in the future)
+You can find similar papers for a given paper in the web page. For how many similar papers to show, you can change the value `top_n` in function `similar_papers` of `serve.py`.  The similar papers is found by purely semantic features.
 
 ### Fetch from dblp
 

@@ -18,6 +18,8 @@ Users now can select how to search papers: TF-IDF features, semantic features, o
 
 The style is modified, we will support theme selection in the future.
 
+The finding similar papers uses semantic search by default.
+
 ## [0.0.2] - 2024-01-19
 
 ### Added
