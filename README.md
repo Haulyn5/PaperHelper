@@ -2,7 +2,7 @@
 
 A versatile tool designed to streamline the process of fetching and managing academic paper information. 
 
-The project is still under development. The current version is a prototype that can fetch papers from Arxiv and display them in a web page.
+The project is still under development. The current version is a prototype that can fetch papers from Arxiv and DBLP, and display them in a web page. The users could also search papers, find similar papers. 
 
 ## TODO:
 
@@ -52,7 +52,7 @@ For the first time, you may find that no paper was listed in the web page. You n
 
 ### Fetch from Arxiv
 
-You can fetch papers from Arxiv by running the following command. Note that this will fetch 20 papers from Arxiv with default query. You can change the default query in `arxiv_fetcher.py`.
+You can fetch papers from Arxiv by running the following command. Note that this will fetch 20 papers from Arxiv with default query. You can change the default query in the settings page.
 
 ```bash
 python ./arxiv_fetcher.py --num 20 
@@ -87,7 +87,7 @@ You can now search for papers with 4 methods/ features: `Match`, `TF-IDF`, `Sema
 
 ### Similar papers
 
-You can find similar papers for a given paper in the web page. For how many similar papers to show, you can change the value `top_n` in function `similar_papers` of `serve.py`.  The similar papers is found by purely semantic features.
+You can find similar papers for a given paper in the web page. For how many similar papers to show, you can change the it in the settings page.  The similar papers is found by purely semantic features.
 
 ### Fetch from dblp
 
@@ -110,9 +110,7 @@ python dblp_fetcher.py --url "https://dblp.org/db/conf/ndss/ndss2022.html" --nam
 
 ### Semantic Search
 
-We implement semantic search with [all-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2). 
-
-We will add options to choose using TF-IDF features or semantic features. 
+We implement semantic search with [all-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2). With semantic search, you can search for papers with similar meaning. 
 
 In our test, it takes around 1 second to process 30 papers with an i7-9700 CPU.
 

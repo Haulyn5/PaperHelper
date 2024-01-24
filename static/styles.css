@@ -1,9 +1,10 @@
 :root {
-    --primary-color: #222831; /* Define a root variable for primary color */
-    --secondary-color: #393e46; /* Define a root variable for secondary color */
-    --tertiary-color: #00adb5; /* Define a root variable for tertiary color */
-    --tertiary-color-light: #00c4cc; /* Define a root variable for tertiary color */
-    --quaternary-color: #eeeeee; /* Define a root variable for quaternary color */
+    --primary-color: #222831; /* Mainly used as backgrounds of the whole page */
+    --secondary-color: #393e46; /* Mainly used to create slight differences from the background, such as containers */
+    --tertiary-color: #00adb5; /* Mainly used for buttons */
+    --tertiary-color-light: #00c4cc; /* Mainly used when hover on the button */
+    --quaternary-color: #eeeeee; /* Mainly used by words */
+    --base-paper-color: #e9ffe9; /* Color used by base paper background */
   }
 
 body {
@@ -121,6 +122,10 @@ h1, #pagination {
     margin-bottom: 30px;
 }
 
+.base_paper-info {
+    color: var(--secondary-color);
+}
+
 .base-paper h2 {
     color: #28a745; /* Green color for the title */
 }
@@ -208,7 +213,7 @@ h1, #pagination {
 .navbar {
     display: flex;
     justify-content: space-between;
-    background-color: var(--tertiary-color);
+    background-color: var(--secondary-color);
     color: var(--quaternary-color);
     padding: 10px;
 }
