@@ -100,7 +100,7 @@ def search_papers(query, vectorizer):
     combined_scores = {}
 
     # Load TF-IDF feature vectors
-    if search_feature in ['tf-idf', 'both', 'combination']:
+    if search_feature in ['tf-idf', 'combination']:
         tfidf_feature_matrix = load_tfidf_feature_vectors()
         tfidf_query_vector = vectorizer.transform([query])
         tfidf_similarities = cosine_similarity(tfidf_feature_matrix, tfidf_query_vector).flatten()
@@ -114,7 +114,7 @@ def search_papers(query, vectorizer):
             combined_scores[pid] = combined_scores.get(papers[i].id, 0) + tfidf_scores[pid] * weights['tfidf']
 
     # Load Semantic vectors
-    if search_feature in ['semantic', 'both', 'combination']:
+    if search_feature in ['semantic', 'combination']:
         semantic_vectors = load_semantic_vectors()
         model = get_sentence_transformer_model()
         query_vector = model.encode([query])
@@ -301,7 +301,12 @@ def update_settings():
     settings = {
         "default_arxiv_query": request.form['default_arxiv_query'],
         "number_of_similar_papers": int(request.form['number_of_similar_papers']),
-        "search_feature": request.form['search_feature']
+        "search_feature": request.form['search_feature'],
+        "feature_weights": {
+            "tfidf": int(request.form['tfidf_weight']),
+            "semantic": int(request.form['semantic_weight']),
+            "match": int(request.form['match_weight'])
+        }
     }
     with open('settings.json', 'w') as file:
         json.dump(settings, file)
@@ -312,7 +317,12 @@ def create_default_settings():
     default_settings = {
         "default_arxiv_query": "cat:cs.CV+OR+cat:cs.LG+OR+cat:cs.CL+OR+cat:cs.AI+OR+cat:cs.CR+OR+cat:eess.AS&sortBy=lastUpdatedDate&sortOrder=descending",
         "number_of_similar_papers": 25,
-        "search_feature": "both"
+        "search_feature": "combination",
+        "feature_weights": {
+            "tfidf": 1,
+            "semantic": 1,
+            "match": 1
+        }
     }
     with open('settings.json', 'w') as file:
         json.dump(default_settings, file)

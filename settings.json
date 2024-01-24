@@ -1,6 +1,0 @@
-{
-    "default_arxiv_query": "cat:cs.CV+OR+cat:cs.LG+OR+cat:cs.CL+OR+cat:cs.AI+OR+cat:cs.CR+OR+cat:eess.AS&sortBy=lastUpdatedDate&sortOrder=descending",
-    "number_of_similar_papers": 25,
-    "search_feature": "combination"
-}
-  

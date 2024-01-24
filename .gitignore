@@ -10,3 +10,4 @@ S&P_information.txt
 instance/papers.db-journal
 semantic_vectors.npz
 paper_hashes.json
+settings.json

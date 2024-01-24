@@ -55,12 +55,26 @@ h1, #pagination {
     text-align: center;
     margin-bottom: 20px;
 }
-.search-form input, .pagination-form input {
+.search-form input {
     padding: 10px;
     margin-right: 5px;
     border: 1px solid #ddd;
     border-radius: 4px;
+    width: 50%;
+    font-size: medium;
+    color: var(--quaternary-color);
+    background-color: var(--secondary-color);
 }
+
+.pagination-form input {
+    padding: 10px;
+    margin-right: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: var(--quaternary-color);
+    background-color: var(--secondary-color);
+}
+
 .search-form button, .pagination-form button {
     padding: 10px 15px;
     border: none;
@@ -68,6 +82,7 @@ h1, #pagination {
     color: var(--quaternary-color);
     border-radius: 4px;
     cursor: pointer;
+    font-size: medium;
 }
 .search-form button:hover, .pagination-form button:hover {
     background-color: var(--tertiary-color-light);
@@ -202,6 +217,7 @@ h1, #pagination {
     color: var(--quaternary-color);
     text-decoration: none;
     padding: 5px 10px;
+    font-size: large;
 }
 
 .nav-item .nav-link:hover {
