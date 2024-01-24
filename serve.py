@@ -10,12 +10,18 @@ from scipy import sparse
 from datetime import datetime
 from sentence_transformers import SentenceTransformer
 import time
+from flask_caching import Cache
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///papers.db'
 app.config['SECRET_KEY'] = 'your_secret_key'
 db = SQLAlchemy(app)
-
+# cache
+cache = Cache(config={'CACHE_TYPE': 'SimpleCache'})
+cache.init_app(app)
+# Set a timeout for cache, e.g., 5 minutes
+CACHE_TIMEOUT = 300
+sentence_transformer_model = None
 
 class ResearchPaper(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -48,6 +54,12 @@ class ResearchPaper(db.Model):
 
 # db.create_all()
     
+def get_sentence_transformer_model():
+    global sentence_transformer_model
+    if sentence_transformer_model is None:
+        sentence_transformer_model = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2')
+    return sentence_transformer_model
+
 def read_settings():
     with open('settings.json', 'r') as file:
         return json.load(file)
@@ -74,6 +86,7 @@ def load_semantic_vectors():
         return np.load('semantic_vectors.npz', allow_pickle=True)['vectors'].item()
     return None
 
+@cache.memoize(timeout=CACHE_TIMEOUT)
 def search_papers(query, vectorizer):
     settings = read_settings()
     search_feature = settings['search_feature']
@@ -103,7 +116,7 @@ def search_papers(query, vectorizer):
     # Load Semantic vectors
     if search_feature in ['semantic', 'both', 'combination']:
         semantic_vectors = load_semantic_vectors()
-        model = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2') if semantic_vectors else None
+        model = get_sentence_transformer_model()
         query_vector = model.encode([query])
         paper_ids = list(semantic_vectors.keys())
         vectors_matrix = np.array([semantic_vectors[pid] for pid in paper_ids])
