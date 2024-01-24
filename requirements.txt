@@ -7,3 +7,4 @@ SQLAlchemy
 tqdm
 requests
 beautifulsoup4
+Flask-Caching

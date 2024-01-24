@@ -7,6 +7,15 @@
 
 </head>
 <body>
+    <nav class="navbar">
+        <div class="nav-item">
+            <a href="/" class="nav-link">Home</a>
+        </div>
+        <div class="nav-item">
+            <a href="/settings" class="nav-link">Settings</a>
+        </div>
+    </nav>
+    
     <div class="container">
         <!-- Display Flash Messages -->
         {% for message in get_flashed_messages(category_filter=["error"]) %}

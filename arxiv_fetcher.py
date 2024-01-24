@@ -3,9 +3,10 @@ import argparse
 from datetime import datetime
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from serve import ResearchPaper, db  # Adjust the import as necessary
+from serve import ResearchPaper, db, read_settings  # Adjust the import as necessary
 from urllib.parse import quote  # Import for URL encoding
 import unicodedata
+import tqdm
 
 
 def normalize_authors(authors_str):
@@ -30,7 +31,7 @@ def fetch_arxiv_papers(query, max_results):
         # print(feed)
         total_fetched, new_papers, updated_papers, already_exists = 0, 0, 0, 0
 
-        for entry in feed.entries:
+        for entry in tqdm.tqdm(feed.entries):
             # print("-----------------------------------")
             # print(f"Title: {entry.title}")
             # print(f"Authors: {entry.authors}")
@@ -85,9 +86,11 @@ def fetch_arxiv_papers(query, max_results):
 
 
 if __name__ == "__main__":
+    settings = read_settings()
+    default_query = settings['default_arxiv_query']
     parser = argparse.ArgumentParser(description='Fetch papers from arXiv and store them in the database.')
     parser.add_argument('--num', type=int, default=10, help='Number of papers to fetch', metavar='max_results')
-    parser.add_argument('-q', '--query', type=str, default="cat:cs.CV+OR+cat:cs.LG+OR+cat:cs.CL+OR+cat:cs.AI+OR+cat:cs.CR+OR+cat:eess.AS&sortBy=lastUpdatedDate&sortOrder=descending", help='Query to search for papers')
+    parser.add_argument('-q', '--query', type=str, default=default_query, help='Query to search for papers')
 
     args = parser.parse_args()
 

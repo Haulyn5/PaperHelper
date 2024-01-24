@@ -34,6 +34,14 @@
 </head>
 
 <body>
+    <nav class="navbar">
+        <div class="nav-item">
+            <a href="/" class="nav-link">Home</a>
+        </div>
+        <div class="nav-item">
+            <a href="/settings" class="nav-link">Settings</a>
+        </div>
+    </nav>
     <div class="container">
         <h1>Edit Paper Information</h1>
         <form action="{{ url_for('update_paper') }}" method="post" class="edit-form">

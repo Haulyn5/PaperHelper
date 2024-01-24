@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Settings</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-item">
+            <a href="/" class="nav-link">Home</a>
+        </div>
+        <!-- <div class="nav-item">
+            <a href="/settings" class="nav-link">Settings</a>
+        </div> -->
+    </nav>
+    <div class="container">
+        <h1>Settings</h1>
+        <form action="{{ url_for('update_settings') }}" method="post">
+            <div class="form-group">
+                <label for="default_arxiv_query">Default Arxiv Query:</label>
+                <input type="text" id="default_arxiv_query" name="default_arxiv_query"
+                    value="{{ settings.default_arxiv_query }}" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="number_of_similar_papers">Number of Similar Papers:</label>
+                <input type="number" id="number_of_similar_papers" name="number_of_similar_papers"
+                    value="{{ settings.number_of_similar_papers }}" class="form-control">
+
+            <div  class="form-group">
+                <label for="search_feature">Search Feature:</label>
+                <select id="search_feature" name="search_feature" onchange="showWeights()" class="form-control">
+                    <option value="tf-idf" {% if settings.search_feature=='tf-idf' %}selected{% endif %}>TF-IDF</option>
+                    <option value="semantic" {% if settings.search_feature=='semantic' %}selected{% endif %}>Semantic
+                    </option>
+                    <option value="match" {% if settings.search_feature=='match' %}selected{% endif %}>Match</option>
+                    <option value="combination" {% if settings.search_feature=='combination' %}selected{% endif %}>Combination</option>
+                </select>
+            </div>
+            <div id="weights"  class="form-group" style="display: none;">
+                <label for="tfidf_weight">TF-IDF Weight:</label>
+                <input type="number" id="tfidf_weight" name="tfidf_weight" value="{{ settings.feature_weights.tfidf }}" class="form-control">
+                <label for="semantic_weight">Semantic Weight:</label>
+                <input type="number" id="semantic_weight" name="semantic_weight" value="{{ settings.feature_weights.semantic }}" class="form-control">
+                <label for="match_weight">Match Weight:</label>
+                <input type="number" id="match_weight" name="match_weight" value="{{ settings.feature_weights.match }}" class="form-control">
+            </div>
+            <button type="submit"  class="btn btn-primary">Update Settings</button>
+        </form>
+        
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if the search feature is set to 'combination'
+            const searchFeature = document.getElementById('search_feature');
+            if (searchFeature.value === 'combination') {
+                showWeights();
+            }
+        });
+
+        function showWeights() {
+            var searchFeature = document.getElementById("search_feature");
+            var weightDiv = document.getElementById("weights");
+            if (searchFeature.value === "combination") {
+                weightDiv.style.display = "block";
+            } else {
+                weightDiv.style.display = "none";
+            }
+        }
+        </script>
+        
+    </div>
+</body>
+
+</html>

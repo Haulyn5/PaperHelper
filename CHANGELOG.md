@@ -1,6 +1,26 @@
 # Change Log
 ---
-[0.0.2] - 2024-01-19
+## [0.0.3] - 2024-01-24
+
+### Added
+
+A setting page for the user to change the default query, the number of similar papers to show, search settings, etc.
+
+A Navigation bar in the top of the page.
+
+Semantic search based on [MiniLM](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2) which shows better performance than TF-IDF in most cases. 
+
+Users now can select how to search papers: TF-IDF features, semantic features, or both.
+
+### Changed
+
+! Important: `feature_vectors.npz` renamed to `tf_idf_feature_vectors.npz`. Please rename the file manually if you have already run the previous version.
+
+The style is modified, we will support theme selection in the future.
+
+The finding similar papers uses semantic search by default.
+
+## [0.0.2] - 2024-01-19
 
 ### Added
 
