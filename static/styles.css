@@ -123,6 +123,10 @@ h1, #pagination {
 }
 
 .base_paper-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 10px;
     color: var(--secondary-color);
 }
 
@@ -137,7 +141,7 @@ h1, #pagination {
     margin-bottom: 10px;
 }
 
-.paper-info p {
+.paper-info p, .base_paper-info p {
     margin: 0 10px 0px 0; 
     flex: 0 1 auto;
 }
@@ -147,7 +151,7 @@ h1, #pagination {
 }
 
 /* Style for authors and abstract to maintain full width */
-.paper-info p.full-width {
+.paper-info p.full-width, .base_paper-info p.full-width {
     flex-basis: 100%; /* Forces full width */
     margin-top: 10px; /* Adds space above authors and abstract */
 }
