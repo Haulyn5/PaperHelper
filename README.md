@@ -1,24 +1,26 @@
 # PaperHelper
 
-A versatile tool designed to streamline the process of fetching and managing academic paper information. 
+PaperHelper is a versatile tool designed to streamline the process of fetching and managing academic paper information. It aims to enhance the experience of researchers and students by providing efficient access to relevant papers and facilitating various paper-related tasks.
 
-The project is still under development. The current version is a prototype that can fetch papers from Arxiv and display them in a web page.
+This project draws inspiration from [arxiv-sanity-lite](https://github.com/karpathy/arxiv-sanity-lite) and aims to offer even more features. For now, one notable improvement is the utilization of semantic feature vectors, which enables PaperHelper to outperform arxiv-sanity-lite in finding similar papers.
+
+The current version of PaperHelper is a functional prototype that successfully fetches papers from Arxiv and DBLP, and presents them in a web page. However, please note that the project is still under active development, and additional features and improvements are planned.
 
 ## TODO:
 
 - [x] Basic search function
-- [x] Improve the search efficiency. Store the feature vectors in a file out of the database.
-- [x] Show similar paper for a given paper (based on the feature vectors)
-- [x] Fetch information from dblp
-- [x] An Edit page for the user to edit the information of a paper.
-- [x] Add semantic embedding method like [MiniLM](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2) to enhance the performance.
-- [x] A setting page for the user to change the default query, the number of similar papers to show, ranking parameters, etc.
-- [x] The search result could be improved. Arxiv-sanity-lite shows a better result. Now we incorporate the search method of arxiv-sanity-lite as `Match` and you could chose it in the settings page.
-- [ ] Implement abstract parser for more conferences
-- [ ] A page to allow user to manually compute feature vectors.
-- [ ] Allow user to add tags to papers
-- [ ] Allow user to receive recommendations based on tagged papers (like [arxiv-sanity-lite](https://github.com/karpathy/arxiv-sanity-lite))
-- [ ] Analysis page for a specific conference
+- [x] Improve search efficiency by storing feature vectors in a separate file outside the database.
+- [x] Show similar papers for a given paper using feature vectors.
+- [x] Fetch information from DBLP database.
+- [x] Implement an Edit page for users to modify paper information.
+- [x] Incorporate semantic embedding methods like MiniLM for enhanced performance.
+- [x] Develop a Settings page for users to configure default queries, the number of similar papers to display, ranking parameters, and more.
+- [x] Enhance search results by incorporating the effective search method from arxiv-sanity-lite as Match, which users can select in the Settings page.
+- [ ] Implement abstract parsing for additional conferences.
+- [ ] Create a page to allow users to manually compute feature vectors.
+- [ ] Enable users to add tags to papers.
+- [ ] Provide recommendations based on tagged papers, similar to arxiv-sanity-lite.
+- [ ] Develop an Analysis page for specific conferences.
 
 ## Installation
 
@@ -52,7 +54,7 @@ For the first time, you may find that no paper was listed in the web page. You n
 
 ### Fetch from Arxiv
 
-You can fetch papers from Arxiv by running the following command. Note that this will fetch 20 papers from Arxiv with default query. You can change the default query in `arxiv_fetcher.py`.
+You can fetch papers from Arxiv by running the following command. Note that this will fetch 20 papers from Arxiv with default query. You can change the default query in the settings page.
 
 ```bash
 python ./arxiv_fetcher.py --num 20 
@@ -87,7 +89,7 @@ You can now search for papers with 4 methods/ features: `Match`, `TF-IDF`, `Sema
 
 ### Similar papers
 
-You can find similar papers for a given paper in the web page. For how many similar papers to show, you can change the value `top_n` in function `similar_papers` of `serve.py`.  The similar papers is found by purely semantic features.
+You can find similar papers for a given paper in the web page. For how many similar papers to show, you can change the it in the settings page.  The similar papers is found by purely semantic features.
 
 ### Fetch from dblp
 
@@ -110,9 +112,7 @@ python dblp_fetcher.py --url "https://dblp.org/db/conf/ndss/ndss2022.html" --nam
 
 ### Semantic Search
 
-We implement semantic search with [all-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2). 
-
-We will add options to choose using TF-IDF features or semantic features. 
+We implement semantic search with [all-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2). With semantic search, you can search for papers with similar meaning. 
 
 In our test, it takes around 1 second to process 30 papers with an i7-9700 CPU.
 
