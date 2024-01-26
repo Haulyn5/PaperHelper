@@ -10,6 +10,7 @@ from bs4.element import NavigableString
 import unicodedata
 import random
 import tqdm
+import bibtexparser
 
 def normalize_authors(authors_str):
     normalized_authors = unicodedata.normalize('NFKD', authors_str)
@@ -20,7 +21,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///papers.db"
 db.init_app(app)
 
 Implemented_Conferences_Journals = [
-    "NDSS", "USENIX Security"
+    "NDSS", "USENIX Security", "ICML"
 ]  # all the implemented conferences and journals are listed here
 
 def get_abstract(publication_name, publication_url):
@@ -28,6 +29,8 @@ def get_abstract(publication_name, publication_url):
         return get_abstract_ndss(publication_url)
     elif publication_name == "USENIX Security":
         return get_abstract_usenix_security(publication_url)
+    elif publication_name == "ICML":
+        return get_abstract_icml(publication_url)
     else:
         print("Publication not implemented yet!")
         return ""  # Not implemented yet
@@ -102,6 +105,35 @@ def get_abstract_usenix_security(publication_url, debug=False):
     except Exception as e:
         print(f"Error parsing the page: {e}")
         return None
+
+
+def get_abstract_icml(publication_url, debug=False):
+    # for IMCL, the abstract can be found in the bibtex in the HTML, we parse the bibtex and get the abstract
+    try:
+        start_time = time.time()
+        response = requests.get(publication_url)
+        response.raise_for_status()  # Check that the request was successful
+        if debug:
+            print("Time taken for request: {:.2f} seconds".format(time.time() - start_time))
+        start_time = time.time()
+        soup = BeautifulSoup(response.text, "html.parser")
+        bibtex_element = soup.find("code", id="bibtex")
+        if debug:
+            print("Time taken for parsing: {:.2f} seconds".format(time.time() - start_time))
+        if not bibtex_element:
+            print(f"Page parsed and abstract is not found for {publication_url}")
+            return "Abstract not found"
+        bibtex_text = bibtex_element.text
+        library = bibtexparser.parse_string(bibtex_text)
+        abstract_text = library.entries[0]['abstract']
+        return abstract_text
+    except requests.RequestException as e:
+        print(f"Error fetching the page: {e}")
+        return None
+    except Exception as e:
+        print(f"Error parsing the page: {e}")
+        return None
+
 
 
 def fetch_dblp_papers(dblp_url, publication_name, publication_year):

@@ -16,6 +16,8 @@ The current version of PaperHelper is a functional prototype that successfully f
 - [x] Incorporate semantic embedding methods like MiniLM for enhanced performance.
 - [x] Develop a Settings page for users to configure default queries, the number of similar papers to display, ranking parameters, and more.
 - [x] Enhance search results by incorporating the effective search method from arxiv-sanity-lite as Match, which users can select in the Settings page.
+- [ ] Automatically generate keywords for paper.
+- [ ] Filter papers by author name, publication, year, etc.
 - [ ] Implement abstract parsing for additional conferences.
 - [ ] Create a page to allow users to manually compute feature vectors.
 - [ ] Enable users to add tags to papers.
@@ -99,6 +101,7 @@ This script supports the following publications (for now):
 
 - NDSS (2022, 2023 tested)
 - USENIX Security (2023 tested)
+- ICML (2023 tested)
 
 To fetch papers from DBLP, run the provided command, but ensure you correctly input the conference’s URL, name, and year. The script doesn’t validate inputs, so be careful.
 
