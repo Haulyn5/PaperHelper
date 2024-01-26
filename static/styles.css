@@ -5,6 +5,7 @@
     --tertiary-color-light: #00c4cc; /* Mainly used when hover on the button */
     --quaternary-color: #eeeeee; /* Mainly used by words */
     --base-paper-color: #e9ffe9; /* Color used by base paper background */
+    --base-paper-border-color: #d4edda; /* Color used by base paper border */
   }
 
 body {
@@ -59,7 +60,7 @@ h1, #pagination {
 .search-form input {
     padding: 10px;
     margin-right: 5px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--quaternary-color);;
     border-radius: 4px;
     width: 50%;
     font-size: medium;
@@ -70,7 +71,7 @@ h1, #pagination {
 .pagination-form input {
     padding: 10px;
     margin-right: 5px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--quaternary-color);;
     border-radius: 4px;
     color: var(--quaternary-color);
     background-color: var(--secondary-color);
@@ -98,12 +99,12 @@ h1, #pagination {
     display: inline-block;
 }
 .pagination-button:hover {
-    background-color: #005fa3;
+    background-color: var(--tertiary-color-light);
 }
 .btn-primary {
     padding: 10px 15px;
     background-color: var(--tertiary-color); 
-    color: white;
+    color: var(--quaternary-color);
     text-decoration: none;
     border-radius: 4px;
     display: inline-block;
@@ -116,8 +117,8 @@ h1, #pagination {
 }
 
 .base-paper {
-    background: #e9ffe9; /* Light green background for distinction */
-    border: 1px solid #d4edda;
+    background: var(--base-paper-color); 
+    border: 1px solid var(--base-paper-border-color);
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     margin-bottom: 30px;
 }
@@ -130,9 +131,6 @@ h1, #pagination {
     color: var(--secondary-color);
 }
 
-.base-paper h2 {
-    color: #28a745; /* Green color for the title */
-}
 
 .paper-info {
     display: flex;
@@ -157,7 +155,7 @@ h1, #pagination {
 }
 
 .edit-form {
-    background: #fff;
+    background: var(--secondary-color);
     padding: 20px;
     margin-bottom: 20px;
     border-radius: 5px;
@@ -175,10 +173,16 @@ h1, #pagination {
     margin-bottom: 5px;
 }
 
+.form-group input {
+    border: 1px solid var(--quaternary-color);;
+    color: var(--quaternary-color);
+    background-color: var(--secondary-color);
+}
+
 .form-control {
     width: 95%;
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--primary-color);
     border-radius: 4px;
     margin-bottom: 10px;
     font-size: medium;
@@ -189,11 +193,13 @@ h1, #pagination {
     width: 95%;
     height: 200px;
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--quaternary-color);
     border-radius: 4px;
     margin-bottom: 10px;
     font-size: medium;
     font-family: Arial, sans-serif;
+    color: var(--quaternary-color);
+    background-color: var(--secondary-color);
 }
 
 .btn-update-primary {
@@ -201,8 +207,8 @@ h1, #pagination {
     width: 100%;
     padding: 10px 0;
     text-align: center;
-    background-color: #0077cc;
-    color: white;
+    background-color: var(--tertiary-color);
+    color: var(--quaternary-color);
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -211,7 +217,7 @@ h1, #pagination {
 }
 
 .btn-update-primary:hover {
-    background-color: #005fa3;
+    background-color: var(--tertiary-color-light);
 }
 
 .navbar {
