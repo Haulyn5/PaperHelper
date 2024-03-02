@@ -57,6 +57,7 @@ h1, #pagination {
     text-align: center;
     margin-bottom: 20px;
 }
+
 .search-form input {
     padding: 10px;
     margin-right: 5px;
@@ -67,6 +68,13 @@ h1, #pagination {
     color: var(--quaternary-color);
     background-color: var(--secondary-color);
 }
+
+.search-form input.search_filter {
+    width: 8%;
+    margin-top: 10px;
+}
+
+
 
 .pagination-form input {
     padding: 10px;

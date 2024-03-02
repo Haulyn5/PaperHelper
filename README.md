@@ -16,6 +16,7 @@ The current version of PaperHelper is a functional prototype that successfully f
 - [x] Incorporate semantic embedding methods like MiniLM for enhanced performance.
 - [x] Develop a Settings page for users to configure default queries, the number of similar papers to display, ranking parameters, and more.
 - [x] Enhance search results by incorporating the effective search method from arxiv-sanity-lite as Match, which users can select in the Settings page.
+- [x] Add paper from bib file.
 - [ ] Automatically generate keywords for paper.
 - [ ] Filter papers by author name, publication, year, etc.
 - [ ] Implement abstract parsing for additional conferences.
@@ -111,6 +112,20 @@ We tested S&P 2023 and found that the page is dynamically generated, and parsing
 
 ```bash 
 python dblp_fetcher.py --url "https://dblp.org/db/conf/ndss/ndss2022.html" --name "NDSS" --year "2022"
+```
+
+### Add paper from bib files (Alpha feature)
+
+You can add papers from bib files. This feature may be not stable and is intended for adding papers from ACM Digital Library.  
+
+This script supports the following publications (for now):
+
+- CCS (2023 tested)
+
+#### Command
+
+```bash
+python .\add_paper_with_bib.py --bib_path "path_to_the_bib_file.bib"
 ```
 
 ### Semantic Search

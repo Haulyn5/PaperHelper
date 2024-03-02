@@ -9,3 +9,4 @@ requests
 beautifulsoup4
 Flask-Caching
 bibtexparser==2.0.0b6
+# pybtex==0.24.0

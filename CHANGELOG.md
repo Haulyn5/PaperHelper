@@ -1,5 +1,15 @@
 # Change Log
 ---
+
+## [0.0.4] - 2024-03-02
+
+### Added
+
+Now users can add conference papers from bib files. This feature may be not stable and is intended for adding papers from ACM Digital Library for now. (tested on CCS 2023)
+
+Now users can search papers with publication name.
+
+
 ## [0.0.3] - 2024-01-24
 
 ### Added

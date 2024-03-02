@@ -87,13 +87,16 @@ def load_semantic_vectors():
     return None
 
 @cache.memoize(timeout=CACHE_TIMEOUT)
-def search_papers(query, vectorizer):
+def search_papers(query, vectorizer, publication_name=None):
     settings = read_settings()
     search_feature = settings['search_feature']
     weights = settings.get('feature_weights', {'tfidf': 1, 'semantic': 1, 'match': 1})
-
+    # if publication_name:
+    #     papers = ResearchPaper.query.filter(ResearchPaper.publication_name == publication_name).all()
+    # else:
+    #     papers = ResearchPaper.query.all()
     papers = ResearchPaper.query.all()
-    paper_dict = {paper.id: paper for paper in papers}
+    paper_id_dict = {paper.id: paper for paper in papers}
 
     # Initialize score dictionaries
     tfidf_scores, semantic_scores, match_scores = {}, {}, {}
@@ -102,6 +105,7 @@ def search_papers(query, vectorizer):
     # Load TF-IDF feature vectors
     if search_feature in ['tf-idf', 'combination']:
         tfidf_feature_matrix = load_tfidf_feature_vectors()
+
         tfidf_query_vector = vectorizer.transform([query])
         tfidf_similarities = cosine_similarity(tfidf_feature_matrix, tfidf_query_vector).flatten()
         for i, score in enumerate(tfidf_similarities):
@@ -162,7 +166,11 @@ def search_papers(query, vectorizer):
     final_scores = combined_scores if search_feature == 'combination' else match_scores if search_feature == 'match' else semantic_scores if search_feature == 'semantic' else tfidf_scores
 
     # Sort and return papers based on the final scores
-    sorted_papers = sorted([(paper_dict[pid], score) for pid, score in final_scores.items()], key=lambda x: x[1], reverse=True)
+    sorted_papers = sorted([(paper_id_dict[pid], score) for pid, score in final_scores.items()], key=lambda x: x[1], reverse=True)
+
+    if publication_name:
+        sorted_papers = [paper for paper in sorted_papers if paper[0].publication_name == publication_name]
+
     return sorted_papers
 
 
@@ -171,6 +179,7 @@ def index():
     page = request.args.get('page', 1, type=int)
     per_page = 5
     query = request.args.get('query', None)
+    publication_name = request.args.get('publication_name', None)
     papers_to_show = []
     total_pages = 0
     print(f"query={query}")
@@ -178,14 +187,14 @@ def index():
     if query:
         vectorizer = load_vectorizer()
         if vectorizer:
-            sorted_papers = search_papers(query, vectorizer)
+            sorted_papers = search_papers(query, vectorizer, publication_name)
             papers_to_show = sorted_papers[(page - 1) * per_page: page * per_page]
             total_pages = int(np.ceil(len(sorted_papers) / per_page))
     else:
         papers_query = ResearchPaper.query.order_by(ResearchPaper.arxiv_upload_date.desc())
         papers_to_show = [(paper, None) for paper in papers_query.paginate(page=page, per_page=per_page, error_out=False).items]
         total_pages = papers_query.paginate(page=page, per_page=per_page, error_out=False).pages
-    return render_template('index.html', papers=papers_to_show, total_pages=total_pages, current_page=page, query=query)
+    return render_template('index.html', papers=papers_to_show, total_pages=total_pages, current_page=page, query=query, publication_name=publication_name)
 
 
 def find_similar_papers(paper_id, top_n=25):

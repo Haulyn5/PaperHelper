@@ -176,7 +176,7 @@ def fetch_dblp_papers(dblp_url, publication_name, publication_year):
                 abstract = get_abstract(publication_name, publication_url)  # TODO: add handler function
             else:
                 abstract = ""
-
+            # check if the paper already exists
             existing_paper = ResearchPaper.query.filter_by(
                 title=title, authors=authors_str
             ).first()
@@ -216,7 +216,7 @@ def fetch_dblp_papers(dblp_url, publication_name, publication_year):
 
 
 
-def update_existing_paper(existing_paper, publication_name, publication_date, publication_url, abstract):
+def update_existing_paper(existing_paper, publication_name, publication_date, publication_url, abstract, db=db):
     # print(f"Before update - Title: {existing_paper.title}, Pub Name: {existing_paper.publication_name}, Arxiv id: {existing_paper.arxiv_id}")
     existing_paper.publication_name = publication_name
     existing_paper.publication_date = publication_date

@@ -29,6 +29,11 @@
             <form action="/" method="get">
                 <input type="text" name="query" placeholder="Enter search terms" value="{{ query or '' }}">
                 <button type="submit">Search</button>
+                <!-- break line here -->
+                <br>
+                <label for="publication_name">Filter by Publication Name:</label>
+                <input class="search_filter" type="text" name="publication_name" placeholder="Enter publication name" value="{{ publication_name or '' }}">
+
             </form>    
         </div>
         <div id="papersList">
@@ -84,6 +89,9 @@
                 {% if query %}
                     <input type="hidden" name="query" value="{{ query }}">
                 {% endif %}
+                {% if publication_name %}
+                    <input type="hidden" name="publication_name" value="{{ publication_name }}">
+                {% endif %}
                 <button type="submit">Go to Page</button>
             </form>
         
@@ -92,10 +100,10 @@
         
             <!-- Pagination Buttons -->
             {% if current_page > 1 %}
-                <a href="/?page={{ current_page - 1 }}{% if query %}&query={{ query }}{% endif %}" class="pagination-button">Previous Page</a>
+                <a href="/?page={{ current_page - 1 }}{% if query %}&query={{ query }}{% endif %}{% if publication_name %}&publication_name={{ publication_name }}{% endif %}" class="pagination-button">Previous Page</a>
             {% endif %}
             {% if current_page < total_pages %}
-                <a href="/?page={{ current_page + 1 }}{% if query %}&query={{ query }}{% endif %}" class="pagination-button">Next Page</a>
+                <a href="/?page={{ current_page + 1 }}{% if query %}&query={{ query }}{% endif %}{% if publication_name %}&publication_name={{ publication_name }}{% endif %}" class="pagination-button">Next Page</a>
             {% endif %}
         </div>
     </div>

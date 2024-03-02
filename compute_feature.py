@@ -31,6 +31,7 @@ def compute_tfidf_vectors():
         tfidf_matrix = vectorizer.fit_transform(texts)
         print(f"TF-IDF vectors computed. The shape of the matrix is {tfidf_matrix.shape}.")
         print("The size of the tfidf_matrix variable is:",sys.getsizeof(tfidf_matrix), "bytes.")
+        # Todo: use the papers id as the index of the matrix
 
         # Saving the sparse matrix instead of dense arrays
         sparse.save_npz('tfidf_feature_vectors.npz', tfidf_matrix)
